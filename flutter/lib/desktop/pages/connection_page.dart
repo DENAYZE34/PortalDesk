@@ -1,6 +1,8 @@
 // main window right pane
 
 import 'dart:async';
+import 'package:flutter_hbb/mobile/glass/glass.dart';
+import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'dart:convert';
 import 'dart:math';
 
@@ -314,8 +316,8 @@ class _ConnectionPageState extends State<ConnectionPage>
                 Flexible(child: _buildRemoteIDTextField(context)),
               ],
             ).marginOnly(top: 22),
-            SizedBox(height: 12),
-            Divider().paddingOnly(right: 12),
+            SizedBox(height: kNeon ? 14 : 12),
+            if (!kNeon) Divider().paddingOnly(right: 12),
             Expanded(child: PeerTabPage()),
           ],
         ).paddingOnly(left: 12.0)),
@@ -340,16 +342,29 @@ class _ConnectionPageState extends State<ConnectionPage>
         isTcpTunneling: isTcpTunneling);
   }
 
+  Widget _glassFrame({required Widget child}) => kNeon
+      ? GlassCard(
+          radius: 26,
+          strength: 1.15,
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+          child: child)
+      : Ink(child: child);
+
   /// UI for the remote ID TextField.
   /// Search for a peer.
   Widget _buildRemoteIDTextField(BuildContext context) {
     var w = Container(
       width: 320 + 20 * 2,
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(13)),
-          border: Border.all(color: Theme.of(context).colorScheme.background)),
-      child: Ink(
+      padding: kNeon
+          ? EdgeInsets.zero
+          : const EdgeInsets.fromLTRB(20, 24, 20, 22),
+      decoration: kNeon
+          ? null
+          : BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(13)),
+              border:
+                  Border.all(color: Theme.of(context).colorScheme.background)),
+      child: _glassFrame(
         child: Column(
           children: [
             getConnectionPageTitle(context, false).marginOnly(bottom: 15),
@@ -419,10 +434,12 @@ class _ConnectionPageState extends State<ConnectionPage>
                           enableSuggestions: false,
                           keyboardType: TextInputType.visiblePassword,
                           focusNode: fieldFocusNode,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'WorkSans',
                             fontSize: 22,
                             height: 1.4,
+                            color: kNeon ? Glass.text : null,
+                            fontWeight: kNeon ? FontWeight.w700 : null,
                           ),
                           maxLines: 1,
                           cursorColor:
@@ -430,6 +447,12 @@ class _ConnectionPageState extends State<ConnectionPage>
                           decoration: InputDecoration(
                               filled: false,
                               counterText: '',
+                              border: kNeon ? InputBorder.none : null,
+                              enabledBorder: kNeon ? InputBorder.none : null,
+                              focusedBorder: kNeon ? InputBorder.none : null,
+                              hintStyle: kNeon
+                                  ? const TextStyle(color: Glass.muted)
+                                  : null,
                               hintText: _idInputFocused.value
                                   ? null
                                   : translate('Enter Remote ID'),
@@ -518,22 +541,31 @@ class _ConnectionPageState extends State<ConnectionPage>
             Padding(
               padding: const EdgeInsets.only(top: 13.0),
               child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                SizedBox(
-                  height: 28.0,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      onConnect();
-                    },
-                    child: Text(translate("Connect")),
-                  ),
-                ),
+                kNeon
+                    ? GlassButton(
+                        label: translate('Connect'),
+                        icon: Icons.arrow_outward_rounded,
+                        onPressed: onConnect)
+                    : SizedBox(
+                        height: 28.0,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            onConnect();
+                          },
+                          child: Text(translate("Connect")),
+                        ),
+                      ),
                 const SizedBox(width: 8),
                 Container(
-                  height: 28.0,
-                  width: 28.0,
+                  height: kNeon ? 38.0 : 28.0,
+                  width: kNeon ? 38.0 : 28.0,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(8),
+                    color: kNeon ? Glass.fill(0.12) : null,
+                    border: Border.all(
+                        color: kNeon
+                            ? Glass.edge()
+                            : Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(kNeon ? 99 : 8),
                   ),
                   child: Center(
                     child: StatefulBuilder(

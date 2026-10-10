@@ -12,6 +12,7 @@ import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/connection_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
+import 'package:flutter_hbb/mobile/glass/glass.dart';
 import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
@@ -65,7 +66,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
+        if (!isIncomingOnly && !kNeon) const VerticalDivider(width: 1),
         if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
       ],
     ));
@@ -132,9 +133,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       value: gFFI.serverModel,
       child: Container(
         width: isIncomingOnly ? 280.0 : 200.0,
-        color: kNeon
-            ? Colors.white.withOpacity(0.05)
-            : Theme.of(context).colorScheme.background,
+        decoration: kNeon
+            ? BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                border: Border(
+                    right: BorderSide(color: Colors.white.withOpacity(0.08))))
+            : BoxDecoration(color: Theme.of(context).colorScheme.background),
         child: Stack(
           children: [
             Column(
@@ -191,6 +195,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   buildIDBoard(BuildContext context) {
     final model = gFFI.serverModel;
+    if (kNeon) return _glassIdBoard(context, model);
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 11),
       height: 57,
@@ -257,6 +262,134 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
+  // ---- glass look (PortalDesk night theme) ----
+
+  Widget _glassTip(BuildContext context, bool isOutgoingOnly) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 10, 16, 4),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+            isOutgoingOnly ? translate('Connect') : translate('Your Desktop'),
+            style: const TextStyle(
+                color: Glass.text,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4)),
+        const SizedBox(height: 4),
+        Text(translate(isOutgoingOnly ? 'outgoing_only_desk_tip' : 'desk_tip'),
+            style:
+                const TextStyle(color: Glass.soft, fontSize: 12, height: 1.3)),
+      ]),
+    );
+  }
+
+  Widget _glassIdBoard(BuildContext context, ServerModel model) {
+    return GlassCard(
+      margin: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 10, 14),
+      radius: 22,
+      strength: 1.15,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Text('ID',
+              style: TextStyle(
+                  color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+          const Spacer(),
+          _glassIconButton(Icons.content_copy_rounded, translate('Copy'), () {
+            Clipboard.setData(ClipboardData(text: model.serverId.text));
+            showToast(translate('Copied'));
+          }),
+          _glassIconButton(Icons.more_vert_rounded, translate('Settings'),
+              DesktopTabPage.onAddSetting),
+        ]),
+        GestureDetector(
+          onDoubleTap: () {
+            Clipboard.setData(ClipboardData(text: model.serverId.text));
+            showToast(translate('Copied'));
+          },
+          child: TextFormField(
+            controller: model.serverId,
+            readOnly: true,
+            decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.only(top: 4, bottom: 2)),
+            style: const TextStyle(
+                color: Glass.text,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8),
+          ).workaroundFreezeLinuxMint(),
+        ),
+      ]),
+    );
+  }
+
+  Widget _glassPasswordBoard(
+      BuildContext context, ServerModel model, bool showOneTime) {
+    return GlassCard(
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+      padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
+      radius: 22,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(translate('One-time Password').toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+        Row(children: [
+          Expanded(
+            child: GestureDetector(
+              onDoubleTap: () {
+                if (showOneTime) {
+                  Clipboard.setData(
+                      ClipboardData(text: model.serverPasswd.text));
+                  showToast(translate('Copied'));
+                }
+              },
+              child: TextFormField(
+                controller: model.serverPasswd,
+                readOnly: true,
+                decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.only(top: 6, bottom: 2)),
+                style: const TextStyle(
+                    color: Glass.text,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700),
+              ).workaroundFreezeLinuxMint(),
+            ),
+          ),
+          if (showOneTime)
+            _glassIconButton(
+                Icons.refresh_rounded,
+                translate('Refresh Password'),
+                bind.mainUpdateTemporaryPassword),
+          if (!bind.isDisableSettings())
+            _glassIconButton(
+                Icons.edit_rounded,
+                translate('Change Password'),
+                () => DesktopSettingPage.switch2page(SettingsTabKey.safety)),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _glassIconButton(IconData icon, String tip, VoidCallback onTap) {
+    return Tooltip(
+      message: tip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(7),
+          child: Icon(icon, size: 18, color: Glass.soft),
+        ),
+      ),
+    );
+  }
+
   Widget buildPopupMenu(BuildContext context) {
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     RxBool hover = false.obs;
@@ -298,6 +431,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     final showOneTime = model.approveMode != 'click' &&
         model.verificationMethod != kUsePermanentPassword;
+    if (kNeon) return _glassPasswordBoard(context, model, showOneTime);
     return Container(
       margin: EdgeInsets.only(left: 20.0, right: 16, top: 13, bottom: 13),
       child: Row(
@@ -392,6 +526,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   buildTip(BuildContext context) {
     final isOutgoingOnly = bind.isOutgoingOnly();
+    if (kNeon) return _glassTip(context, isOutgoingOnly);
     return Padding(
       padding:
           const EdgeInsets.only(left: 20.0, right: 16, top: 16.0, bottom: 5),
@@ -1158,7 +1293,10 @@ class _UpdateRowState extends State<_UpdateRow> {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-        fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color);
+        fontSize: 12,
+        color: kNeon
+            ? Glass.muted
+            : Theme.of(context).textTheme.bodySmall?.color);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
       child: Row(children: [
@@ -1174,7 +1312,9 @@ class _UpdateRowState extends State<_UpdateRow> {
             onTap: _check,
             child: Text('Проверить обновления',
                 style: style.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: kNeon
+                        ? Glass.cyan
+                        : Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600)),
           ),
       ]),

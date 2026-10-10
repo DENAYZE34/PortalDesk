@@ -592,7 +592,7 @@ class MyTheme {
   ).copyWith(
     extensions: <ThemeExtension<dynamic>>[
       ColorThemeExtension.dark,
-      TabbarTheme.dark,
+      kNeon ? TabbarTheme.glass : TabbarTheme.dark,
     ],
   );
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_hbb/mobile/glass/glass.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -1466,6 +1467,18 @@ class TabbarTheme extends ThemeExtension<TabbarTheme> {
       hoverColor: Colors.white54,
       closeHoverColor: Colors.white,
       selectedTabBackgroundColor: Colors.white54);
+
+  static const glass = TabbarTheme(
+      selectedTabIconColor: Glass.cyan,
+      unSelectedTabIconColor: Color(0xFF3B4690),
+      selectedTextColor: Glass.text,
+      unSelectedTextColor: Glass.muted,
+      selectedIconColor: Glass.soft,
+      unSelectedIconColor: Glass.text,
+      dividerColor: Color(0x1FFFFFFF),
+      hoverColor: Color(0x22FFFFFF),
+      closeHoverColor: Color(0x55F87171),
+      selectedTabBackgroundColor: Color(0x24FFFFFF));
 
   static const dark = TabbarTheme(
       selectedTabIconColor: MyTheme.accent,

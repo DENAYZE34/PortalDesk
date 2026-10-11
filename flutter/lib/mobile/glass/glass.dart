@@ -261,8 +261,8 @@ class _NavChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-        alignment: Alignment.center,
+        // icon 22 + 13*2 padding = 48dp tall, 14*2 + 22 = 50dp wide:
+        // the Material minimum without letting the chip expand.
         padding: EdgeInsets.symmetric(
             horizontal: selected ? 18 : 14, vertical: 13),
         decoration: BoxDecoration(

@@ -191,7 +191,9 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
 
 /// Connection page for connecting to a remote peer.
 class ConnectionPage extends StatefulWidget {
-  const ConnectionPage({Key? key}) : super(key: key);
+  /// Card shown beside the connect panel (this computer's ID and password).
+  final Widget? leading;
+  const ConnectionPage({Key? key, this.leading}) : super(key: key);
 
   @override
   State<ConnectionPage> createState() => _ConnectionPageState();
@@ -312,10 +314,12 @@ class _ConnectionPageState extends State<ConnectionPage>
             child: Column(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (kNeon && widget.leading != null) widget.leading!,
                 Flexible(child: _buildRemoteIDTextField(context)),
               ],
-            ).marginOnly(top: 22),
+            ).marginOnly(top: kNeon ? 8 : 22),
             SizedBox(height: kNeon ? 14 : 12),
             if (!kNeon) Divider().paddingOnly(right: 12),
             Expanded(child: PeerTabPage()),

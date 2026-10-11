@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter_hbb/desktop/glass/portal_ui.dart';
+import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -273,6 +275,7 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (kNeon) return _portalLayout(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: _buildBlock(
@@ -300,6 +303,58 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
         ],
       ),
     );
+  }
+
+  Widget _portalLayout(BuildContext context) {
+    final tabs = _settingTabs();
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: _buildBlockColumn(children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+          child: Obx(() => PortalTopNav(
+                items: [
+                  for (final t in tabs)
+                    PortalNavItem(translate(t.label), t.selected),
+                ],
+                index: tabs.indexWhere((t) => t.key == selectedTab.value).clamp(0, tabs.length - 1).toInt(),
+                onChanged: (i) {
+                  final key = tabs[i].key;
+                  final index = DesktopSettingPage.tabKeys.indexOf(key);
+                  if (index == -1) return;
+                  if (selectedTab.value != key) controller.jumpToPage(index);
+                  selectedTab.value = key;
+                },
+              )),
+        ),
+        Expanded(
+          child: PageView(
+            controller: controller,
+            physics: const NeverScrollableScrollPhysics(),
+            children: _children(),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildBlockColumn({required List<Widget> children}) {
+    return Obx(() {
+      final videoConnBlock =
+          _canBeBlocked.value && stateGlobal.videoConnCount > 0;
+      return Stack(children: [
+        buildRemoteBlock(
+          block: _block,
+          mask: false,
+          use: canBeBlocked,
+          child: preventMouseKeyBuilder(
+            child: Column(children: children),
+            block: videoConnBlock,
+          ),
+        ),
+        if (videoConnBlock) Container(color: Colors.black.withOpacity(0.5)),
+      ]);
+    });
   }
 
   Widget _header(BuildContext context) {
@@ -2637,6 +2692,22 @@ Widget _Card(
     {required String title,
     required List<Widget> children,
     List<Widget>? title_suffix}) {
+  if (kNeon) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 780),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 7, 20, 7),
+          child: PortalSection(
+            title: translate(title),
+            icon: _sectionIcon(title),
+            trailing: title_suffix,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
   return Row(
     children: [
       Flexible(
@@ -2713,6 +2784,13 @@ Widget _OptionCheckBox(
     enabled = false;
   }
 
+  if (kNeon) {
+    return Obx(() => PortalSwitchRow(
+          label: translate(label),
+          value: ref.value,
+          onChanged: enabled && !isOptFixed ? (v) => onChanged(v) : null,
+        ));
+  }
   return GestureDetector(
     child: Obx(
       () => Row(
@@ -2755,6 +2833,19 @@ Widget _Radio<T>(BuildContext context,
           }
         }
       : null;
+  if (kNeon) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: PortalChoiceRow<T>(
+          options: [(value, translate(label))],
+          value: groupValue,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
   return GestureDetector(
     child: Row(
       children: [
@@ -2935,6 +3026,15 @@ class _WaylandCardState extends State<WaylandCard> {
 // ignore: non_constant_identifier_names
 Widget _Button(String label, Function() onPressed,
     {bool enabled = true, String? tip, ButtonStyle? style}) {
+  if (kNeon) {
+    final b = PortalButton(
+        label: translate(label), onPressed: enabled ? () => onPressed() : null);
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: tip == null ? b : Tooltip(message: translate(tip), child: b)));
+  }
   var button = ElevatedButton(
     onPressed: enabled ? onPressed : null,
     child: Text(
@@ -2955,6 +3055,15 @@ Widget _Button(String label, Function() onPressed,
 
 // ignore: non_constant_identifier_names
 Widget _SubButton(String label, Function() onPressed, [bool enabled = true]) {
+  if (kNeon) {
+    return Padding(
+        padding: const EdgeInsets.only(left: 30, top: 4, bottom: 4),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: PortalButton(
+                label: translate(label),
+                onPressed: enabled ? () => onPressed() : null)));
+  }
   return Row(
     children: [
       ElevatedButton(
@@ -3380,4 +3489,31 @@ class _PairingCardState extends State<_PairingCard> {
       ]),
     ]);
   }
+}
+
+IconData _sectionIcon(String title) {
+  final t = title.toLowerCase();
+  if (t.contains('theme') || t.contains('language') || t.contains('display')) {
+    return Icons.palette_rounded;
+  }
+  if (t.contains('service') || t.contains('permission')) {
+    return Icons.power_settings_new_rounded;
+  }
+  if (t.contains('password') || t.contains('security') || t.contains('access')) {
+    return Icons.lock_rounded;
+  }
+  if (t.contains('network') || t.contains('server') || t.contains('proxy')) {
+    return Icons.language_rounded;
+  }
+  if (t.contains('codec') || t.contains('hardware') || t.contains('quality')) {
+    return Icons.speed_rounded;
+  }
+  if (t.contains('audio') || t.contains('sound')) return Icons.volume_up_rounded;
+  if (t.contains('clipboard') || t.contains('file')) {
+    return Icons.folder_open_rounded;
+  }
+  if (t.contains('account')) return Icons.person_rounded;
+  if (t.contains('print')) return Icons.print_rounded;
+  if (t.contains('about') || t.contains('version')) return Icons.info_rounded;
+  return Icons.tune_rounded;
 }

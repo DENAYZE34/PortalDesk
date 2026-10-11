@@ -12,6 +12,7 @@ import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/connection_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
+import 'package:flutter_hbb/desktop/glass/portal_ui.dart';
 import 'package:flutter_hbb/mobile/glass/glass.dart';
 import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
@@ -62,6 +63,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   Widget build(BuildContext context) {
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
+    if (kNeon && !isIncomingOnly) {
+      return _buildBlock(
+          child: ConnectionPage(
+              leading: bind.isOutgoingOnly() ? null : _myComputerCard(context)));
+    }
     return _buildBlock(
         child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,6 +270,140 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   // ---- glass look (PortalDesk night theme) ----
+
+  /// "This computer": ring, ID, password, update status. Replaces the
+  /// original left column.
+  Widget _myComputerCard(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: gFFI.serverModel,
+      child: Consumer<ServerModel>(builder: (context, model, _) {
+        final showOneTime = model.approveMode != 'click' &&
+            model.verificationMethod != kUsePermanentPassword;
+        return Container(
+          width: 332,
+          margin: const EdgeInsets.only(right: 16),
+          child: GlassCard(
+            radius: 28,
+            strength: 1.2,
+            padding: const EdgeInsets.all(20),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const PortalRing(size: 48),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Этот компьютер',
+                            style: TextStyle(
+                                color: Glass.text,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 2),
+                        Row(children: [
+                          StatusDot(
+                              color: svcStopped.value ? Glass.warn : Glass.ok),
+                          const SizedBox(width: 6),
+                          Text(
+                              svcStopped.value
+                                  ? 'служба остановлена'
+                                  : 'доступен для подключения',
+                              style: const TextStyle(
+                                  color: Glass.soft, fontSize: 12)),
+                        ]),
+                      ]),
+                ),
+                _glassIconButton(Icons.settings_rounded, translate('Settings'),
+                    DesktopTabPage.onAddSetting),
+              ]),
+              const SizedBox(height: 18),
+              Row(children: [
+                const Text('ID',
+                    style: TextStyle(
+                        color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                const Spacer(),
+                _glassIconButton(Icons.content_copy_rounded, translate('Copy'), () {
+                  Clipboard.setData(ClipboardData(text: model.serverId.text));
+                  showToast(translate('Copied'));
+                }),
+              ]),
+              GestureDetector(
+                onDoubleTap: () {
+                  Clipboard.setData(ClipboardData(text: model.serverId.text));
+                  showToast(translate('Copied'));
+                },
+                child: TextFormField(
+                  controller: model.serverId,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero),
+                  style: const TextStyle(
+                      color: Glass.text,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8),
+                ).workaroundFreezeLinuxMint(),
+              ),
+              const SizedBox(height: 10),
+              Divider(color: Colors.white.withOpacity(0.08), height: 1),
+              const SizedBox(height: 10),
+              Row(children: [
+                Text(translate('One-time Password').toUpperCase(),
+                    style: const TextStyle(
+                        color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                const Spacer(),
+                if (showOneTime)
+                  _glassIconButton(Icons.refresh_rounded,
+                      translate('Refresh Password'),
+                      bind.mainUpdateTemporaryPassword),
+                if (!bind.isDisableSettings())
+                  _glassIconButton(
+                      Icons.edit_rounded,
+                      translate('Change Password'),
+                      () => DesktopSettingPage.switch2page(SettingsTabKey.safety)),
+              ]),
+              GestureDetector(
+                onDoubleTap: () {
+                  if (showOneTime) {
+                    Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
+                    showToast(translate('Copied'));
+                  }
+                },
+                child: showOneTime
+                    ? TextFormField(
+                        controller: model.serverPasswd,
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            isDense: true,
+                            contentPadding: EdgeInsets.only(top: 2)),
+                        style: const TextStyle(
+                            color: Glass.text,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700),
+                      ).workaroundFreezeLinuxMint()
+                    : const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text('используется постоянный пароль',
+                            style: TextStyle(color: Glass.soft, fontSize: 14))),
+              ),
+              const SizedBox(height: 14),
+              Obx(() => buildHelpCards(stateGlobal.updateUrl.value)),
+              const _UpdateRow(),
+            ]),
+          ),
+        );
+      }),
+    );
+  }
 
   Widget _glassInstallCard(String title, String content, String btnText,
       GestureTapCallback onPressed,

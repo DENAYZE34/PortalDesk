@@ -552,8 +552,8 @@ class MyTheme {
         : mobileTextButtonTheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: kNeon ? Neon.violet : MyTheme.accent,
-        foregroundColor: Colors.white,
+        backgroundColor: kNeon ? Colors.white : MyTheme.accent,
+        foregroundColor: kNeon ? const Color(0xFF0B1030) : Colors.white,
         disabledForegroundColor: Colors.white70,
         disabledBackgroundColor: Colors.white10,
         shape: RoundedRectangleBorder(

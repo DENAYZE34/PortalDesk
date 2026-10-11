@@ -261,8 +261,10 @@ class _NavChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
+        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+        alignment: Alignment.center,
         padding: EdgeInsets.symmetric(
-            horizontal: selected ? 18 : 14, vertical: 11),
+            horizontal: selected ? 18 : 14, vertical: 13),
         decoration: BoxDecoration(
           color: selected ? Colors.white.withOpacity(0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(Glass.rPill),

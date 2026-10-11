@@ -93,7 +93,11 @@ class _ConnectionPageState extends State<ConnectionPage> {
         ])),
         SliverFillRemaining(
           hasScrollBody: true,
-          child: PeerTabPage(),
+          child: Padding(
+            // room for the floating navigation pill
+            padding: EdgeInsets.only(bottom: kNeon ? 92 : 0),
+            child: PeerTabPage(),
+          ),
         )
       ],
     ).marginOnly(top: 2, left: 10, right: 10);
@@ -254,11 +258,11 @@ class _ConnectionPageState extends State<ConnectionPage> {
                             fontSize: 16,
                             color: MyTheme.darkGray,
                           ),
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                             letterSpacing: 0.2,
-                            color: MyTheme.darkGray,
+                            color: kNeon ? Glass.muted : MyTheme.darkGray,
                           ),
                         ),
                         inputFormatters: [IDTextInputFormatter()],

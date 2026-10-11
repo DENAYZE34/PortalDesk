@@ -746,12 +746,12 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) == 'Y';
     final settings = SettingsList(
       platform: kNeon ? DevicePlatform.iOS : null,
-      contentPadding: kNeon ? const EdgeInsets.only(bottom: 110) : null,
       sections: _visibleSections([
         SettingsSection(title: const Text('Основное'), tiles: [
           SettingsTile(
-              title: const Text('Зум одним пальцем'),
-              description: Text(_zoomModeText(currentZoomMode())),
+              title: _tileTitle('Зум одним пальцем', _zoomModeText(currentZoomMode())),
+              description:
+                  kNeon ? null : Text(_zoomModeText(currentZoomMode())),
               leading: const Icon(Icons.zoom_in),
               onPressed: (context) async {
                 final pick = await showModalBottomSheet<ZoomMode>(
@@ -777,8 +777,11 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
               }),
           if (isAndroid || isIOS)
             SettingsTile(
-                title: const Text('Проверить обновления'),
-                description: ValueListenableBuilder<int?>(
+                title: _tileTitleWidget(
+                    'Проверить обновления', _updateStatusText()),
+                description: kNeon
+                    ? null
+                    : ValueListenableBuilder<int?>(
                   valueListenable: portalLatestBuild,
                   builder: (_, latest, __) {
                     final cur = portalCurrentBuild;
@@ -793,8 +796,12 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 onPressed: (context) =>
                     checkForPortalUpdate(context, manual: true)),
           SettingsTile(
-              title: const Text('Разрешения телефона'),
-              description: const Text('Что включено, чтобы телефоном можно было управлять'),
+              title: _tileTitle('Разрешения телефона',
+                  'Что включено, чтобы телефоном можно было управлять'),
+              description: kNeon
+                  ? null
+                  : const Text(
+                      'Что включено, чтобы телефоном можно было управлять'),
               leading: const Icon(Icons.verified_user_outlined),
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const PermissionWizardPage()))),
@@ -803,8 +810,12 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
               leading: const Icon(Icons.help_outline),
               onPressed: (context) => showFirstRunWizard(context)),
           SettingsTile(
-              title: const Text('Скопировать журнал сбоев'),
-              description: const Text('Для отправки разработчику, с телефона ничего не уходит'),
+              title: _tileTitle('Скопировать журнал сбоев',
+                  'Для отправки разработчику, с телефона ничего не уходит'),
+              description: kNeon
+                  ? null
+                  : const Text(
+                      'Для отправки разработчику, с телефона ничего не уходит'),
               leading: const Icon(Icons.bug_report_outlined),
               onPressed: (context) async {
                 final log = await readCrashLog();
@@ -816,8 +827,12 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 }
               }),
           SettingsTile.switchTile(
-            title: const Text('Показать все настройки'),
-            description: const Text('Сеть, сервер, кодеки, безопасность, вкладка «Чат» (после перезапуска)'),
+            title: _tileTitle('Показать все настройки',
+                'Сеть, сервер, кодеки, безопасность, вкладка «Чат» (после перезапуска)'),
+            description: kNeon
+                ? null
+                : const Text(
+                    'Сеть, сервер, кодеки, безопасность, вкладка «Чат» (после перезапуска)'),
             initialValue: _advanced,
             onToggle: (v) async {
               await bind.mainSetLocalOption(
@@ -1136,7 +1151,8 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 onPressed: (context) async {
                   await launchUrl(Uri.parse(url));
                 },
-                title: Text(translate("Version: ") + version),
+                title: Text('${translate("Version")}: $version'
+                    '${portalCurrentBuild == null ? '' : ' · сборка $portalCurrentBuild'}'),
                 value: Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: Text('PortalDesk',
@@ -1190,7 +1206,57 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             )
           : null,
     );
-    return settings;
+    return kNeon
+        ? Padding(
+            // room for the floating navigation pill
+            padding: const EdgeInsets.only(bottom: 92),
+            child: settings)
+        : settings;
+  }
+
+  Widget _updateStatusText() => ValueListenableBuilder<int?>(
+        valueListenable: portalLatestBuild,
+        builder: (_, latest, __) {
+          final cur = portalCurrentBuild;
+          if (cur == null) return const Text('Сборка неизвестна');
+          if (latest != null && latest > cur) {
+            return Text('Установлена $cur, доступна $latest');
+          }
+          return Text('Установлена сборка $cur');
+        },
+      );
+
+  /// In the glass (iOS-grouped) list a `description` is drawn outside the
+  /// card, which splits the row in two. Fold it into the title instead.
+  Widget _tileTitle(String title, String? secondary) {
+    if (!kNeon || secondary == null) return Text(title);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(title),
+        const SizedBox(height: 2),
+        Text(secondary,
+            style: const TextStyle(
+                fontSize: 12.5, color: Glass.soft, height: 1.25)),
+      ],
+    );
+  }
+
+  Widget _tileTitleWidget(String title, Widget secondary) {
+    if (!kNeon) return Text(title);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(title),
+        const SizedBox(height: 2),
+        DefaultTextStyle.merge(
+            style: const TextStyle(
+                fontSize: 12.5, color: Glass.soft, height: 1.25),
+            child: secondary),
+      ],
+    );
   }
 
   Future<bool> canStartOnBoot() async {

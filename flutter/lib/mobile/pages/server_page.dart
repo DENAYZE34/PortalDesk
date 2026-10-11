@@ -217,7 +217,9 @@ class _ServerPageState extends State<ServerPage> {
                             : ServiceNotRunningNotification(),
                         const ConnectionManager(),
                         const PermissionChecker(),
-                        SizedBox.fromSize(size: const Size(0, 15.0)),
+                        // room for the floating navigation pill
+                        SizedBox.fromSize(
+                            size: Size(0, kNeon ? 104.0 : 15.0)),
                       ],
                     ),
                   ),
@@ -835,6 +837,7 @@ class PaddingCard extends StatelessWidget {
     if (kNeon) {
       return GlassCard(
           margin: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 0),
+          radius: 24,
           padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
           child: Column(children: children));
     }

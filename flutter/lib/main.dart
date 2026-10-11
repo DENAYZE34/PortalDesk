@@ -530,8 +530,13 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           builder: isAndroid
               ? (context, child) => AccessibilityListener(
                     child: MediaQuery(
+                      // Follow the system font size, clamped so the glass
+                      // layout cannot break at extreme settings.
                       data: MediaQuery.of(context).copyWith(
-                        textScaler: TextScaler.linear(1.0),
+                        textScaler: TextScaler.linear(MediaQuery.of(context)
+                            .textScaler
+                            .scale(1.0)
+                            .clamp(0.9, 1.3)),
                       ),
                       child: child ?? Container(),
                     ),

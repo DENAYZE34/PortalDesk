@@ -80,6 +80,32 @@ class InputService : AccessibilityService() {
     }
 
     private val logTag = "input service"
+
+    // Remote input hides this phone's soft keyboard for a few seconds after the
+    // last remote event, then gives it back for local use. Only the controlling
+    // phone's keyboard is then visible.
+    private val keyboardHandler = Handler(Looper.getMainLooper())
+    private var keyboardHidden = false
+    private val keyboardRestore = Runnable { setHostKeyboardHidden(false) }
+
+    private fun onRemoteInputActivity() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
+        keyboardHandler.removeCallbacks(keyboardRestore)
+        if (!keyboardHidden) setHostKeyboardHidden(true)
+        keyboardHandler.postDelayed(keyboardRestore, 6000L)
+    }
+
+    private fun setHostKeyboardHidden(hide: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
+        try {
+            val mode = if (hide) AccessibilityService.SHOW_MODE_HIDDEN else AccessibilityService.SHOW_MODE_AUTO
+            if (softKeyboardController.setShowMode(mode)) {
+                keyboardHidden = hide
+            }
+        } catch (e: Exception) {
+            Log.w(logTag, "soft keyboard mode not changed: " + e.message)
+        }
+    }
     private var leftIsDown = false
     private var touchPath = Path()
     private var stroke: GestureDescription.StrokeDescription? = null
@@ -104,6 +130,7 @@ class InputService : AccessibilityService() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun onMouseInput(mask: Int, _x: Int, _y: Int) {
+        onRemoteInputActivity()
         val x = max(0, _x)
         val y = max(0, _y)
 
@@ -224,6 +251,7 @@ class InputService : AccessibilityService() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun onTouchInput(mask: Int, _x: Int, _y: Int) {
+        onRemoteInputActivity()
         when (mask) {
             TOUCH_PAN_UPDATE -> {
                 mouseX -= _x * SCREEN_INFO.scale
@@ -395,6 +423,7 @@ class InputService : AccessibilityService() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun onKeyEvent(data: ByteArray) {
+        onRemoteInputActivity()
         val keyEvent = KeyEvent.parseFrom(data)
         val keyboardMode = keyEvent.getMode()
 
@@ -745,6 +774,8 @@ class InputService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        keyboardHandler.removeCallbacks(keyboardRestore)
+        setHostKeyboardHidden(false)
         ctx = null
         // Keep this fallback even though onUnbind usually notifies first.
         notifyInputState()

@@ -1022,7 +1022,14 @@ Widget _hoverAction(
               onHover: (value) => hover.value = value,
               onTap: onTap,
               onTapDown: onTapDown,
-              child: Container(padding: padding, child: child))),
+              child: Container(
+                  // 40dp minimum touch area on phones
+                  constraints: (isAndroid || isIOS)
+                      ? const BoxConstraints(minWidth: 40, minHeight: 40)
+                      : null,
+                  alignment: (isAndroid || isIOS) ? Alignment.center : null,
+                  padding: padding,
+                  child: child))),
     ),
   );
 }

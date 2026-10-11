@@ -263,7 +263,13 @@ class _NavChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
@@ -295,6 +301,7 @@ class _NavChip extends StatelessWidget {
                 : const SizedBox.shrink(),
           ),
         ]),
+      ),
       ),
     );
   }

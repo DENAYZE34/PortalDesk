@@ -746,7 +746,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) == 'Y';
     final settings = SettingsList(
       platform: kNeon ? DevicePlatform.iOS : null,
-      sections: _visibleSections([
+      sections: [..._visibleSections([
         SettingsSection(title: const Text('Основное'), tiles: [
           SettingsTile(
               title: _tileTitle('Зум одним пальцем', _zoomModeText(currentZoomMode())),
@@ -1194,6 +1194,12 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
           ],
         ),
       ]),
+        // blank block so the last row can scroll clear of the floating nav
+        if (kNeon)
+          SettingsSection(tiles: [
+            CustomSettingsTile(child: const SizedBox(height: 96)),
+          ]),
+      ],
       darkTheme: kNeon
           ? const SettingsThemeData(
               settingsListBackground: Colors.transparent,
@@ -1206,12 +1212,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             )
           : null,
     );
-    return kNeon
-        ? Padding(
-            // room for the floating navigation pill
-            padding: const EdgeInsets.only(bottom: 92),
-            child: settings)
-        : settings;
+    return settings;
   }
 
   Widget _updateStatusText() => ValueListenableBuilder<int?>(

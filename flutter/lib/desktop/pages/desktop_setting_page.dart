@@ -2555,10 +2555,34 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://github.com/DENAYZE34/PortalDesk');
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk/blob/main/PRIVACY.md');
                   },
                   child: Text(
-                    translate('Privacy Statement'),
+                    'Конфиденциальность',
+                    style: linkStyle,
+                  ).marginSymmetric(vertical: 4.0)),
+              InkWell(
+                  onTap: () {
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk/blob/main/TERMS.md');
+                  },
+                  child: Text(
+                    'Условия использования',
+                    style: linkStyle,
+                  ).marginSymmetric(vertical: 4.0)),
+              InkWell(
+                  onTap: () {
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk/blob/main/SECURITY.md');
+                  },
+                  child: Text(
+                    'Безопасность',
+                    style: linkStyle,
+                  ).marginSymmetric(vertical: 4.0)),
+              InkWell(
+                  onTap: () {
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk/blob/main/NOTICE.md');
+                  },
+                  child: Text(
+                    'Лицензия и авторство',
                     style: linkStyle,
                   ).marginSymmetric(vertical: 4.0)),
               InkWell(

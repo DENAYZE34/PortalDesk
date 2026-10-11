@@ -1192,10 +1192,28 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 ),
                 leading: Icon(Icons.perm_identity)),
             SettingsTile(
-              title: Text(translate("Privacy Statement")),
-              onPressed: (context) =>
-                  launchUrlString('https://github.com/DENAYZE34/PortalDesk'),
+              title: const Text('Конфиденциальность'),
+              onPressed: (context) => launchUrlString(
+                  'https://github.com/DENAYZE34/PortalDesk/blob/main/PRIVACY.md'),
               leading: Icon(Icons.privacy_tip),
+            ),
+            SettingsTile(
+              title: const Text('Условия использования'),
+              onPressed: (context) => launchUrlString(
+                  'https://github.com/DENAYZE34/PortalDesk/blob/main/TERMS.md'),
+              leading: Icon(Icons.gavel_rounded),
+            ),
+            SettingsTile(
+              title: const Text('Безопасность'),
+              onPressed: (context) => launchUrlString(
+                  'https://github.com/DENAYZE34/PortalDesk/blob/main/SECURITY.md'),
+              leading: Icon(Icons.shield_outlined),
+            ),
+            SettingsTile(
+              title: const Text('Лицензия и авторство'),
+              onPressed: (context) => launchUrlString(
+                  'https://github.com/DENAYZE34/PortalDesk/blob/main/NOTICE.md'),
+              leading: Icon(Icons.description_outlined),
             )
           ],
         ),

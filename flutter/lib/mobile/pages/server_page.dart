@@ -246,9 +246,11 @@ class ServiceNotRunningNotification extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(translate("android_start_service_tip"),
-                    style:
-                        const TextStyle(fontSize: 12, color: MyTheme.darkGray))
-                .marginOnly(bottom: 8),
+                    style: TextStyle(
+                        fontSize: kNeon ? 13.5 : 12,
+                        height: kNeon ? 1.35 : null,
+                        color: kNeon ? Glass.soft : MyTheme.darkGray))
+                .marginOnly(bottom: kNeon ? 14 : 8),
             ElevatedButton.icon(
                 icon: const Icon(Icons.play_arrow),
                 onPressed: () {

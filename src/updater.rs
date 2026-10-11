@@ -356,7 +356,8 @@ fn update_new_version(update_msi: bool, version: &str, file_path: &PathBuf) {
 
 /// The only GitHub repository updates are downloaded from.
 const UPDATE_OWNER: &str = "DENAYZE34";
-const UPDATE_REPO: &str = "portal-remote";
+/// The repository name after the rename, and the name older installs know.
+const UPDATE_REPOS: [&str; 2] = ["PortalDesk", "portal-remote"];
 
 /// Checks [data] against the digest GitHub lists for the asset. A missing digest
 /// only logs a warning (TLS to github.com still protects the download); a
@@ -412,7 +413,7 @@ pub fn get_update_download_file_from_url(url: &str) -> Option<PathBuf> {
     let filename = segments.next()?;
 
     if owner != UPDATE_OWNER
-        || repo != UPDATE_REPO
+        || !UPDATE_REPOS.contains(&repo)
         || releases != "releases"
         || download != "download"
         || tag.is_empty()
@@ -698,6 +699,7 @@ mod tests {
     fn update_download_file_accepts_expected_github_asset_urls() {
         let file = get_download_file_from_url(
             "https://github.com/DENAYZE34/portal-remote/releases/download/1.4.0/rustdesk-1.4.0-x86_64.dmg",
+            "https://github.com/DENAYZE34/PortalDesk/releases/download/1.5.0/PortalDesk-setup-1.5.0-x86_64.exe",
         )
         .expect("valid GitHub release asset URL");
 

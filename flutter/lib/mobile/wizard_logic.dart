@@ -18,7 +18,7 @@ const List<WizardStep> kWizardSteps = [
 ];
 
 const String kWizardReleasesUrl =
-    'https://github.com/DENAYZE34/portal-remote/releases/latest';
+    'https://github.com/DENAYZE34/PortalDesk/releases/latest';
 
 const String kWizardDoneOption = 'portal-wizard';
 

@@ -2555,7 +2555,7 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://github.com/DENAYZE34/portal-remote');
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk');
                   },
                   child: Text(
                     translate('Privacy Statement'),
@@ -2563,7 +2563,7 @@ class _AboutState extends State<_About> {
                   ).marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://github.com/DENAYZE34/portal-remote');
+                    launchUrlString('https://github.com/DENAYZE34/PortalDesk');
                   },
                   child: Text(
                     translate('Website'),

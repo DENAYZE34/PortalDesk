@@ -1033,7 +1033,7 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
     // Portal: mobile builds are installed by hand, no update banner.
     #[cfg(any(target_os = "android", target_os = "ios"))]
     return Ok(());
-    let url = "https://api.github.com/repos/DENAYZE34/portal-remote/releases/latest".to_owned();
+    let url = "https://api.github.com/repos/DENAYZE34/PortalDesk/releases/latest".to_owned();
     let proxy_conf = Config::get_socks();
     let tls_url = get_url_for_tls(&url, &proxy_conf);
     let tls_type = get_cached_tls_type(tls_url);

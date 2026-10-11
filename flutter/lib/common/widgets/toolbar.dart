@@ -18,7 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 bool isEditOsPassword = false;
 const String kPeerOptionAllowWaylandKeyboard = 'allow-wayland-keyboard';
 const String kWaylandKeyboardIssueUrl =
-    'https://github.com/DENAYZE34/portal-remote/issues';
+    'https://github.com/DENAYZE34/PortalDesk/issues';
 final Set<String> _waylandKeyboardPromptSuppressedConnectionIds = <String>{};
 
 Future<bool> openWaylandKeyboardIssueUrl() {

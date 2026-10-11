@@ -16,9 +16,9 @@ const String _kBuild = String.fromEnvironment('PORTAL_BUILD');
 // 64-bit ARM phones use android-latest; 32-bit ARM and x86_64 have their own releases.
 final String _kAbi = abiSuffix(Platform.version);
 final String _kReleaseApi =
-    'https://api.github.com/repos/DENAYZE34/portal-remote/releases/tags/${isIOS ? 'ios' : 'android$_kAbi'}-latest';
+    'https://api.github.com/repos/DENAYZE34/PortalDesk/releases/tags/${isIOS ? 'ios' : 'android$_kAbi'}-latest';
 final String _kApkUrl =
-    'https://github.com/DENAYZE34/portal-remote/releases/download/android$_kAbi-latest/PortalDesk-android$_kAbi.apk';
+    'https://github.com/DENAYZE34/PortalDesk/releases/download/android$_kAbi-latest/PortalDesk-android$_kAbi.apk';
 
 /// Newest build seen on GitHub (null until the first successful check); the
 /// Settings tile shows it.
@@ -38,7 +38,7 @@ Future<void> initPortalBuild() async {
 }
 
 const String _kIosSource =
-    'https://github.com/DENAYZE34/portal-remote/releases/download/ios-latest/apps.json';
+    'https://github.com/DENAYZE34/PortalDesk/releases/download/ios-latest/apps.json';
 
 DateTime? _lastCheck;
 

@@ -43,7 +43,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   double? get height => bind.isIncomingOnly() ? null : em * 3;
 
   void onUsePublicServerGuide() {
-    const url = "https://github.com/DENAYZE34/portal-remote";
+    const url = "https://github.com/DENAYZE34/PortalDesk";
     canLaunchUrlString(url).then((can) {
       if (can) {
         launchUrlString(url);

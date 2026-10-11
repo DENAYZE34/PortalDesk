@@ -187,9 +187,9 @@ class _InstallPageBodyState extends State<_InstallPageBody>
                           InkWell(
                             hoverColor: Colors.transparent,
                             onTap: () => launchUrlString(
-                                'https://github.com/DENAYZE34/portal-remote'),
+                                'https://github.com/DENAYZE34/PortalDesk'),
                             child: Tooltip(
-                              message: 'https://github.com/DENAYZE34/portal-remote',
+                              message: 'https://github.com/DENAYZE34/PortalDesk',
                               child: Row(children: [
                                 Icon(Icons.launch_outlined, size: 16)
                                     .marginOnly(right: 5),

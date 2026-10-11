@@ -45,7 +45,7 @@ class SettingsPage extends StatefulWidget implements PageShape {
   State<SettingsPage> createState() => _SettingsState();
 }
 
-const url = 'https://github.com/DENAYZE34/portal-remote';
+const url = 'https://github.com/DENAYZE34/PortalDesk';
 
 enum KeepScreenOn {
   never,
@@ -1194,7 +1194,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             SettingsTile(
               title: Text(translate("Privacy Statement")),
               onPressed: (context) =>
-                  launchUrlString('https://github.com/DENAYZE34/portal-remote'),
+                  launchUrlString('https://github.com/DENAYZE34/PortalDesk'),
               leading: Icon(Icons.privacy_tip),
             )
           ],
@@ -1369,7 +1369,7 @@ void showAbout(OverlayDialogManager dialogManager) {
         Text('Версия: $version'),
         InkWell(
             onTap: () async {
-              const url = 'https://github.com/DENAYZE34/portal-remote';
+              const url = 'https://github.com/DENAYZE34/PortalDesk';
               await launchUrl(Uri.parse(url));
             },
             child: Padding(

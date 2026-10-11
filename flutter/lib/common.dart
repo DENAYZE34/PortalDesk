@@ -3759,7 +3759,7 @@ Widget loadPowered(BuildContext context) {
     cursor: SystemMouseCursors.click,
     child: GestureDetector(
       onTap: () {
-        launchUrl(Uri.parse('https://github.com/DENAYZE34/portal-remote'));
+        launchUrl(Uri.parse('https://github.com/DENAYZE34/PortalDesk'));
       },
       child: Opacity(
           opacity: 0.5,

@@ -225,19 +225,27 @@ class GlassNavBar extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           heightFactor: 1,
-          child: GlassCard(
-            radius: Glass.rPill,
-            padding: const EdgeInsets.all(6),
-            strength: 1.15,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < items.length; i++)
-                  _NavChip(
-                      item: items[i],
-                      selected: i == index,
-                      onTap: () => onChanged(i)),
-              ],
+          child: ConstrainedBox(
+            // never wider than the screen, whatever the phone or font size
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width - 24),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: GlassCard(
+                radius: Glass.rPill,
+                padding: const EdgeInsets.all(6),
+                strength: 1.15,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < items.length; i++)
+                      _NavChip(
+                          item: items[i],
+                          selected: i == index,
+                          onTap: () => onChanged(i)),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -350,6 +358,14 @@ class GlassDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
+      child: FittedBox(fit: BoxFit.scaleDown, child: _dock()),
+    );
+  }
+
+  Widget _dock() {
     return GlassCard(
       radius: Glass.rPill,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),

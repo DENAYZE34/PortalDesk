@@ -117,6 +117,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a 95-character fingerprint wraps under its title, not beside it',
+      (tester) async {
+    const fp =
+        'fb9b 8f70 1f48 055a ab3a 8dc3 5bf4 f3f2 a64b 8f10 77b0 6e72 d3ff 2e5c 9a41 03aa';
+    await tester.binding.setSurfaceSize(const Size(360, 780));
+    await tester.pumpWidget(_host(
+        GlassCard(
+          child: Row(children: [
+            const Icon(Icons.fingerprint),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text('Отпечаток'),
+                    Text(fp, style: TextStyle(fontSize: 12.5)),
+                  ]),
+            ),
+          ]),
+        ),
+        scale: 1.3));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    final title = tester.getSize(find.text('Отпечаток'));
+    expect(title.height, lessThan(40), reason: 'title must stay on one line');
+    final value = tester.getSize(find.text(fp));
+    expect(value.width, lessThanOrEqualTo(360));
+  });
+
   testWidgets('primary button text is dark on white (readable)',
       (tester) async {
     await tester.pumpWidget(_host(

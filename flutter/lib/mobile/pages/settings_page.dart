@@ -1171,11 +1171,17 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             if (isAndroid)
               SettingsTile(
                   onPressed: (context) => onCopyFingerprint(_fingerprint),
-                  title: Text(translate("Fingerprint")),
-                  value: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text(_fingerprint),
-                  ),
+                  // a 95-character fingerprint cannot share a row with its
+                  // title: it goes on its own wrapped line below it
+                  title: kNeon
+                      ? _tileTitle(translate("Fingerprint"), _fingerprint)
+                      : Text(translate("Fingerprint")),
+                  value: kNeon
+                      ? null
+                      : Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text(_fingerprint),
+                        ),
                   leading: Icon(Icons.fingerprint)),
             SettingsTile(
                 onPressed: (context) => onCopyId(_myId),

@@ -132,7 +132,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 200.0,
+        width: isIncomingOnly ? 280.0 : (kNeon ? 268.0 : 200.0),
         decoration: kNeon
             ? BoxDecoration(
                 color: Colors.white.withOpacity(0.05),
@@ -312,11 +312,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             readOnly: true,
             decoration: const InputDecoration(
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
                 isDense: true,
                 contentPadding: EdgeInsets.only(top: 4, bottom: 2)),
             style: const TextStyle(
                 color: Glass.text,
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.8),
           ).workaroundFreezeLinuxMint(),
@@ -352,6 +355,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 readOnly: true,
                 decoration: const InputDecoration(
                     border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
                     isDense: true,
                     contentPadding: EdgeInsets.only(top: 6, bottom: 2)),
                 style: const TextStyle(
@@ -1298,10 +1304,10 @@ class _UpdateRowState extends State<_UpdateRow> {
             ? Glass.muted
             : Theme.of(context).textTheme.bodySmall?.color);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-      child: Row(children: [
+      padding: const EdgeInsets.fromLTRB(18, 6, 16, 10),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(_version.isEmpty ? '' : 'Версия $_version', style: style),
-        const Spacer(),
+        const SizedBox(height: 4),
         if (_checking)
           const SizedBox(
               width: 14,

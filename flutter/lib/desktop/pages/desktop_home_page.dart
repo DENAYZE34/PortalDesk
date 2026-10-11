@@ -51,6 +51,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   var watchIsCanRecordAudio = false;
   Timer? _updateTimer;
   bool isCardClosed = false;
+  String _installedVersion = '';
 
   final RxBool _editHover = false.obs;
   final RxBool _block = false.obs;
@@ -263,6 +264,64 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   // ---- glass look (PortalDesk night theme) ----
+
+  Widget _glassInstallCard(String title, String content, String btnText,
+      GestureTapCallback onPressed,
+      {String? help, String? link, bool closeButton = false, VoidCallback? onClose}) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Glass.violet.withOpacity(0.55), Glass.cyan.withOpacity(0.28)]),
+        border: Border.all(color: Glass.edge(0.28)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(
+              child: Text(title.isEmpty ? '' : translate(title),
+                  style: const TextStyle(
+                      color: Glass.text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800))),
+          if (closeButton)
+            InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: onClose,
+                child: const Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Icon(Icons.close_rounded, size: 18, color: Glass.soft))),
+        ]),
+        if (content.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(translate(content),
+                  style: const TextStyle(
+                      color: Glass.text, fontSize: 12.5, height: 1.4))),
+        ],
+        if (btnText.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GlassButton(label: translate(btnText), onPressed: onPressed)),
+        ],
+        if (help != null && link != null) ...[
+          const SizedBox(height: 8),
+          InkWell(
+              onTap: () async => await launchUrl(Uri.parse(link)),
+              child: Text(translate(help),
+                  style: const TextStyle(
+                      color: Glass.cyan,
+                      decoration: TextDecoration.underline,
+                      fontSize: 12))),
+        ],
+      ]),
+    );
+  }
 
   Widget _glassTip(BuildContext context, bool isOutgoingOnly) {
     return Padding(
@@ -573,7 +632,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildHelpCards(String updateUrl) {
-    if (updateUrl.isNotEmpty && !isCardClosed) {
+    final newVersion = bind.mainGetNewVersion();
+    // Closing the card hides it for this release only; the next release shows it again.
+    final closedFor = bind.mainGetLocalOption(key: 'portal-update-closed');
+    if (updateUrl.isNotEmpty && !isCardClosed && closedFor != newVersion) {
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
@@ -586,11 +648,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         };
       }
       return buildInstallCard(
-          "Status",
-          "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
+          kNeon ? 'Доступно обновление' : "Status",
+          kNeon
+              ? 'Версия $newVersion${_installedVersion.isEmpty ? '' : ' (у вас $_installedVersion)'}. Скачивается с нашей страницы релизов, ID и пароль сохранятся.'
+              : "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} ($newVersion).",
           btnText,
           onPressed,
           closeButton: true,
+          onClosed: () => bind.mainSetLocalOption(
+              key: 'portal-update-closed', value: newVersion),
           help: isToUpdate ? 'Changelog' : null,
           link: isToUpdate
               ? 'https://github.com/DENAYZE34/portal-remote/releases/tag/${bind.mainGetNewVersion()}'
@@ -719,12 +785,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       String? help,
       String? link,
       bool? closeButton,
+      VoidCallback? onClosed,
       String? closeOption}) {
     if (bind.mainGetBuildinOption(key: kOptionHideHelpCards) == 'Y' &&
         content != 'install_daemon_tip') {
       return const SizedBox();
     }
     void closeCard() async {
+      onClosed?.call();
       if (closeOption != null) {
         await bind.mainSetLocalOption(key: closeOption, value: 'N');
         if (bind.mainGetLocalOption(key: closeOption) == 'N') {
@@ -739,6 +807,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       }
     }
 
+    if (kNeon) {
+      return _glassInstallCard(title, content, btnText, onPressed,
+          help: help, link: link, closeButton: closeButton == true, onClose: closeCard);
+    }
     return Stack(
       children: [
         Container(
@@ -837,6 +909,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   @override
   void initState() {
     super.initState();
+    bind.mainGetVersion().then((v) {
+      if (mounted) setState(() => _installedVersion = v);
+    });
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {
       await gFFI.serverModel.fetchID();
       final error = await bind.mainGetError();

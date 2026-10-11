@@ -315,7 +315,7 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           child: Obx(() => PortalTopNav(
                 items: [
                   for (final t in tabs)
-                    PortalNavItem(translate(t.label), t.selected),
+                    PortalNavItem(translate(t.label), _tabGlyph(t.key)),
                 ],
                 index: tabs.indexWhere((t) => t.key == selectedTab.value).clamp(0, tabs.length - 1).toInt(),
                 onChanged: (i) {
@@ -3491,29 +3491,48 @@ class _PairingCardState extends State<_PairingCard> {
   }
 }
 
-IconData _sectionIcon(String title) {
+Object _sectionIcon(String title) {
   final t = title.toLowerCase();
   if (t.contains('theme') || t.contains('language') || t.contains('display')) {
-    return Icons.palette_rounded;
+    return 'palette';
   }
   if (t.contains('service') || t.contains('permission')) {
-    return Icons.power_settings_new_rounded;
+    return 'power';
   }
   if (t.contains('password') || t.contains('security') || t.contains('access')) {
-    return Icons.lock_rounded;
+    return 'lock';
   }
   if (t.contains('network') || t.contains('server') || t.contains('proxy')) {
-    return Icons.language_rounded;
+    return 'globe';
   }
   if (t.contains('codec') || t.contains('hardware') || t.contains('quality')) {
-    return Icons.speed_rounded;
+    return 'gauge';
   }
-  if (t.contains('audio') || t.contains('sound')) return Icons.volume_up_rounded;
+  if (t.contains('audio') || t.contains('sound')) return 'volume';
   if (t.contains('clipboard') || t.contains('file')) {
-    return Icons.folder_open_rounded;
+    return 'folder';
   }
-  if (t.contains('account')) return Icons.person_rounded;
-  if (t.contains('print')) return Icons.print_rounded;
-  if (t.contains('about') || t.contains('version')) return Icons.info_rounded;
-  return Icons.tune_rounded;
+  if (t.contains('account')) return 'user';
+  if (t.contains('print')) return 'printer';
+  if (t.contains('about') || t.contains('version')) return 'info';
+  return 'sliders';
+}
+
+Object _tabGlyph(SettingsTabKey key) {
+  switch (key) {
+    case SettingsTabKey.general:
+      return 'sliders';
+    case SettingsTabKey.safety:
+      return 'shield';
+    case SettingsTabKey.network:
+      return 'globe';
+    case SettingsTabKey.display:
+      return 'monitor';
+    case SettingsTabKey.account:
+      return 'user';
+    case SettingsTabKey.printer:
+      return 'printer';
+    case SettingsTabKey.about:
+      return 'info';
+  }
 }

@@ -348,9 +348,9 @@ class _ConnectionPageState extends State<ConnectionPage>
 
   Widget _glassFrame({required Widget child}) => kNeon
       ? GlassCard(
-          radius: 26,
+          radius: 20,
           strength: 1.15,
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
           child: child)
       : Ink(child: child);
 
@@ -440,7 +440,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                           focusNode: fieldFocusNode,
                           style: TextStyle(
                             fontFamily: 'WorkSans',
-                            fontSize: 22,
+                            fontSize: 20,
                             height: 1.4,
                             color: kNeon ? Glass.text : null,
                             fontWeight: kNeon ? FontWeight.w700 : null,

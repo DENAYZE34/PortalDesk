@@ -280,7 +280,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         final showOneTime = model.approveMode != 'click' &&
             model.verificationMethod != kUsePermanentPassword;
         return Container(
-          width: 332,
+          width: 296,
           margin: const EdgeInsets.only(right: 16),
           child: GlassCard(
             radius: 28,
@@ -288,7 +288,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             padding: const EdgeInsets.all(20),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                const PortalRing(size: 48),
+                const PortalLogo(size: 32),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -316,7 +316,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 _glassIconButton(Icons.settings_rounded, translate('Settings'),
                     DesktopTabPage.onAddSetting),
               ]),
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
               Row(children: [
                 const Text('ID',
                     style: TextStyle(
@@ -344,7 +344,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       contentPadding: EdgeInsets.zero),
                   style: const TextStyle(
                       color: Glass.text,
-                      fontSize: 30,
+                      fontSize: 28,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8),
                 ).workaroundFreezeLinuxMint(),

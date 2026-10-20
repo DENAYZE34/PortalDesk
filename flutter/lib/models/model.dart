@@ -160,7 +160,7 @@ class FfiModel with ChangeNotifier {
 
   bool get inputBlocked => _inputBlocked;
 
-  bool get touchMode => true;
+  bool get touchMode => _touchMode;
 
   bool get isPeerAndroid => _pi.platform == kPeerPlatformAndroid;
   bool get isPeerMobile => isPeerAndroid;
@@ -210,6 +210,13 @@ class FfiModel with ChangeNotifier {
       b = max(b, display.y + scale(display.height, display.scale));
     }
     return Rect.fromLTRB(l, t, r, b);
+  }
+
+  toggleTouchMode() {
+    if (!isPeerAndroid) {
+      _touchMode = !_touchMode;
+      notifyListeners();
+    }
   }
 
   updatePermission(Map<String, dynamic> evt, String id) {

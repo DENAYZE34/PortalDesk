@@ -6,6 +6,8 @@ import 'package:flutter_hbb/common/shared_state.dart';
 import 'package:flutter_hbb/common/widgets/toolbar.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/mobile/widgets/floating_mouse.dart';
+import 'package:flutter_hbb/mobile/widgets/floating_mouse_widgets.dart';
+import 'package:flutter_hbb/mobile/widgets/gesture_help.dart';
 import 'package:flutter_hbb/mobile/widgets/thumb_tools.dart';
 import 'package:flutter_hbb/models/chat_model.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -104,6 +106,7 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
     await _applyPreset(next);
     showToast(qualityPresetLabel(next));
   }
+  bool _showGestureHelp = false;
   String _value = '';
   Orientation? _currentOrientation;
   final _uniqueKey = UniqueKey();
@@ -513,23 +516,33 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
     });
   }
 
-  Widget _bottomWidget() => _showBar && gFFI.ffiModel.pi.displays.isNotEmpty
+  Widget _bottomWidget() => _showGestureHelp
       ? (kNeon
           ? Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
               child: GlassCard(
-                  radius: Glass.rPill,
+                  radius: 24,
                   padding: EdgeInsets.zero,
                   strength: 1.25,
-                  child: getBottomAppBar()))
-          : getBottomAppBar())
-      : Offstage();
+                  child: getGestureHelp()))
+          : getGestureHelp())
+      : (_showBar && gFFI.ffiModel.pi.displays.isNotEmpty
+          ? (kNeon
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: GlassCard(
+                      radius: Glass.rPill,
+                      padding: EdgeInsets.zero,
+                      strength: 1.25,
+                      child: getBottomAppBar()))
+              : getBottomAppBar())
+          : Offstage());
 
   @override
   Widget build(BuildContext context) {
     final keyboardIsVisible =
         keyboardVisibilityController.isVisible && _showEdit;
-    final showActionButton = !_showBar || keyboardIsVisible;
+    final showActionButton = !_showBar || keyboardIsVisible || _showGestureHelp;
 
     return WillPopScope(
       onWillPop: () async {
@@ -546,7 +559,9 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
               : FloatingActionButton(
                   mini: !keyboardIsVisible,
                   child: Icon(
-                    keyboardIsVisible ? Icons.expand_more : Icons.expand_less,
+                    (keyboardIsVisible || _showGestureHelp)
+                        ? Icons.expand_more
+                        : Icons.expand_less,
                     color: Colors.white,
                   ),
                   backgroundColor: kNeon ? const Color(0x33FFFFFF) : MyTheme.accent,
@@ -562,6 +577,8 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
                         gFFI.invokeMethod("enable_soft_keyboard", false);
                         _mobileFocusNode.unfocus();
                         _physicalFocusNode.requestFocus();
+                      } else if (_showGestureHelp) {
+                        _showGestureHelp = false;
                       } else {
                         _showBar = !_showBar;
                       }
@@ -685,6 +702,14 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
                                   color: Colors.white,
                                   icon: Icon(Icons.keyboard),
                                   onPressed: openKeyboard),
+                              IconButton(
+                                color: Colors.white,
+                                icon: Icon(gFFI.ffiModel.touchMode
+                                    ? Icons.touch_app
+                                    : Icons.mouse),
+                                onPressed: () => setState(
+                                    () => _showGestureHelp = !_showGestureHelp),
+                              ),
                             ]) +
                   (isWebDesktop || ffiModel.viewOnly || !ffiModel.keyboard
                       ? <Widget>[]
@@ -758,7 +783,9 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
               right: 10,
               child: QualityMonitor(gFFI.qualityMonitorModel),
             ),
-            KeyHelpTools(keyboardIsVisible: keyboardIsVisible),
+            KeyHelpTools(
+                keyboardIsVisible: keyboardIsVisible,
+                showGestureHelp: _showGestureHelp),
             SizedBox(
               width: 0,
               height: 0,
@@ -793,9 +820,15 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
           if (showCursorPaint) {
             paints.add(CursorPaint(widget.id));
           }
-          paints.add(FloatingMouse(
-            ffi: gFFI,
-          ));
+          if (gFFI.ffiModel.touchMode) {
+            paints.add(FloatingMouse(
+              ffi: gFFI,
+            ));
+          } else {
+            paints.add(FloatingMouseWidgets(
+              ffi: gFFI,
+            ));
+          }
           if (gFFI.ffiModel.keyboard && !gFFI.ffiModel.viewOnly) {
             if (_thumbOn) paints.add(ThumbTools(ffi: gFFI, openOnStart: true));
             final zoomMode = currentZoomMode();
@@ -970,6 +1003,25 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
   }
 
   /// aka changeTouchMode
+  BottomAppBar getGestureHelp() {
+    return BottomAppBar(
+        color: kNeon ? Colors.transparent : null,
+        elevation: kNeon ? 0 : null,
+        child: SingleChildScrollView(
+            controller: ScrollController(),
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: GestureHelp(
+              touchMode: gFFI.ffiModel.touchMode,
+              onTouchModeChange: (t) {
+                gFFI.ffiModel.toggleTouchMode();
+                final v = gFFI.ffiModel.touchMode ? 'Y' : 'N';
+                bind.mainSetLocalOption(key: kOptionTouchMode, value: v);
+              },
+              virtualMouseMode: gFFI.ffiModel.virtualMouseMode,
+              inputModel: gFFI.inputModel,
+            )));
+  }
+
   // * Currently mobile does not enable map mode
   // void changePhysicalKeyboardInputMode() async {
   //   var current = await bind.sessionGetKeyboardMode(id: widget.id) ?? "legacy";
@@ -992,11 +1044,13 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
 
 class KeyHelpTools extends StatefulWidget {
   final bool keyboardIsVisible;
+  final bool showGestureHelp;
 
-  /// need to show by external request, etc [keyboardIsVisible]
-  bool get requestShow => keyboardIsVisible;
+  /// need to show by external request, etc [keyboardIsVisible] or [changeTouchMode]
+  bool get requestShow => keyboardIsVisible || showGestureHelp;
 
-  KeyHelpTools({required this.keyboardIsVisible});
+  KeyHelpTools(
+      {required this.keyboardIsVisible, required this.showGestureHelp});
 
   @override
   State<KeyHelpTools> createState() => _KeyHelpToolsState();

@@ -55,18 +55,21 @@ Future<void> _performSnip(FFI ffi, Rect rect) async {
   im.inputKey('VK_S');
   im.command = prevCmd;
   im.shift = prevShift;
-  await Future.delayed(const Duration(milliseconds: 900));
+  // Windows' screen-snip overlay needs time to activate and grab input;
+  // starting the drag too early lands the mouse-down on the desktop instead
+  // of the overlay, silently dropping the whole gesture.
+  await Future.delayed(const Duration(milliseconds: 1600));
   // 2. drag the selection on the PC
   final path = dragPath(Offset(a.x.toDouble(), a.y.toDouble()),
       Offset(b.x.toDouble(), b.y.toDouble()), 10);
   await im.moveMouse(path.first.dx, path.first.dy);
-  await Future.delayed(const Duration(milliseconds: 120));
+  await Future.delayed(const Duration(milliseconds: 200));
   await im.sendMouse('down', MouseButtons.left);
   for (final p in path.skip(1)) {
     await im.moveMouse(p.dx, p.dy);
     await Future.delayed(const Duration(milliseconds: 25));
   }
-  await Future.delayed(const Duration(milliseconds: 100));
+  await Future.delayed(const Duration(milliseconds: 200));
   await im.sendMouse('up', MouseButtons.left);
   HapticFeedback.mediumImpact();
   showToast('Скриншот в буфере ПК. Нажмите «Вставить» в нужном поле.');

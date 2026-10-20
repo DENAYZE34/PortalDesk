@@ -10,6 +10,7 @@ import 'package:flutter_hbb/models/model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 
 import '../../common.dart';
+import '../neon_theme.dart';
 import '../voice/deepgram_dictation.dart';
 import 'region_snip.dart';
 import 'ring_config.dart';
@@ -350,6 +351,7 @@ class _ThumbToolsState extends State<ThumbTools> {
     'rclick': (Icons.mouse, 'Правый клик'),
     'copy': (Icons.copy, 'Копировать'),
     'paste': (Icons.paste, 'Вставить'),
+    'erase': (Icons.backspace, 'Стереть'),
     'enter': (Icons.keyboard_return, 'Enter'),
     'snip': (Icons.crop, 'Скриншот области'),
     'shot': (Icons.screenshot_monitor, 'Скриншот экрана'),
@@ -366,6 +368,8 @@ class _ThumbToolsState extends State<ThumbTools> {
         _chord('VK_C');
       case 'paste':
         _chord('VK_V');
+      case 'erase':
+        _key('VK_BACK');
       case 'enter':
         _key('VK_RETURN');
       case 'snip':
@@ -446,9 +450,11 @@ class _ThumbToolsState extends State<ThumbTools> {
       onPointerUp: (_) => _scrollStop(),
       onPointerCancel: (_) => _scrollStop(),
       child: Material(
-        color: MyTheme.accent80,
-        shape: const CircleBorder(),
-        elevation: 4,
+        color: kNeon ? const Color(0x33FFFFFF) : MyTheme.accent80,
+        shape: kNeon
+            ? const CircleBorder(side: BorderSide(color: Color(0x40FFFFFF)))
+            : const CircleBorder(),
+        elevation: kNeon ? 0 : 4,
         child: SizedBox(
           width: _item,
           height: _item,
@@ -518,9 +524,11 @@ class _ThumbToolsState extends State<ThumbTools> {
   Widget _ringButton(IconData icon, VoidCallback onTap,
       {VoidCallback? onLongPress}) {
     return Material(
-      color: MyTheme.accent80,
-      shape: const CircleBorder(),
-      elevation: 4,
+      color: kNeon ? const Color(0x33FFFFFF) : MyTheme.accent80,
+      shape: kNeon
+          ? const CircleBorder(side: BorderSide(color: Color(0x40FFFFFF)))
+          : const CircleBorder(),
+      elevation: kNeon ? 0 : 4,
       child: InkWell(
         customBorder: const CircleBorder(),
         onLongPress: onLongPress,
@@ -541,7 +549,9 @@ class _ThumbToolsState extends State<ThumbTools> {
       {bool? active, bool locked = false, double minWidth = 48}) {
     final bg = locked
         ? Colors.orange
-        : (active == true ? MyTheme.accent : Colors.white12);
+        : (active == true
+            ? (kNeon ? const Color(0x40FFFFFF) : MyTheme.accent)
+            : Colors.white12);
     return Padding(
       padding: const EdgeInsets.all(3),
       child: Material(

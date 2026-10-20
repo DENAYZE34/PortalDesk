@@ -47,18 +47,9 @@ class CustomTouchGestureRecognizer extends ScaleGestureRecognizer {
       _debounceTimer?.cancel();
       if (d.pointerCount == 1 && _currentState != GestureState.oneFingerPan) {
         onOneFingerStartDebounce(d);
-      } else if (d.pointerCount == 2 &&
-          _currentState != GestureState.twoFingerScale) {
-        onTwoFingerStartDebounce(d);
-      } else if (d.pointerCount == 3 &&
-          _currentState != GestureState.threeFingerVerticalDrag) {
-        _currentState = GestureState.threeFingerVerticalDrag;
-        if (onThreeFingerVerticalDragStart != null) {
-          onThreeFingerVerticalDragStart!(
-              DragStartDetails(globalPosition: d.localFocalPoint));
-        }
-        debugPrint("start threeFingerScale");
       }
+      // Two-finger scale and three-finger scroll are disabled: single-finger
+      // touch is the only supported input mode.
       if (_currentState != GestureState.none) {
         switch (_currentState) {
           case GestureState.oneFingerPan:

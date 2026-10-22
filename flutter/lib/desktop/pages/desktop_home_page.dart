@@ -212,7 +212,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           Container(
             width: 2,
-            decoration: const BoxDecoration(color: MyTheme.accent),
+            decoration: BoxDecoration(color: MyTheme.accent),
           ).marginOnly(top: 5),
           Expanded(
             child: Padding(
@@ -283,13 +283,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           width: 296,
           margin: const EdgeInsets.only(right: 16),
           child: GlassCard(
-            radius: 28,
+            radius: P.rCard,
             strength: 1.2,
+            liquid: true,
             padding: const EdgeInsets.all(20),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                const PortalLogo(size: 32),
-                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,11 +341,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       filled: false,
                       isDense: true,
                       contentPadding: EdgeInsets.zero),
-                  style: const TextStyle(
-                      color: Glass.text,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8),
+                  style: P.id,
                 ).workaroundFreezeLinuxMint(),
               ),
               const SizedBox(height: 10),
@@ -396,8 +391,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             style: TextStyle(color: Glass.soft, fontSize: 14))),
               ),
               const SizedBox(height: 14),
-              Obx(() => buildHelpCards(stateGlobal.updateUrl.value)),
-              const _UpdateRow(),
+              Obx(() => buildHelpCards(stateGlobal.updateUrl.value, embedded: true)),
             ]),
           ),
         );
@@ -407,59 +401,69 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   Widget _glassInstallCard(String title, String content, String btnText,
       GestureTapCallback onPressed,
-      {String? help, String? link, bool closeButton = false, VoidCallback? onClose}) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 6, 14, 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Glass.violet.withOpacity(0.55), Glass.cyan.withOpacity(0.28)]),
-        border: Border.all(color: Glass.edge(0.28)),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      {String? help, String? link, bool closeButton = false, VoidCallback? onClose,
+      bool embedded = false}) {
+    final body = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(
               child: Text(title.isEmpty ? '' : translate(title),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       color: Glass.text,
-                      fontSize: 15,
+                      fontSize: 13,
                       fontWeight: FontWeight.w800))),
           if (closeButton)
-            InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: onClose,
-                child: const Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Icon(Icons.close_rounded, size: 18, color: Glass.soft))),
+            PortalIconButton(
+                icon: Icons.close_rounded, tip: translate('Close'), onTap: onClose, size: 24),
         ]),
         if (content.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.only(right: 4),
               child: Text(translate(content),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Glass.text, fontSize: 12.5, height: 1.4))),
+                      color: Glass.soft, fontSize: 11.5, height: 1.3))),
         ],
         if (btnText.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GlassButton(label: translate(btnText), onPressed: onPressed)),
+          const SizedBox(height: 8),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: GlassButton(
+                  label: translate(btnText),
+                  onPressed: onPressed,
+                  dense: true)),
         ],
         if (help != null && link != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           InkWell(
               onTap: () async => await launchUrl(Uri.parse(link)),
               child: Text(translate(help),
                   style: const TextStyle(
-                      color: Glass.cyan,
+                      color: Colors.white,
                       decoration: TextDecoration.underline,
-                      fontSize: 12))),
+                      fontSize: 11))),
         ],
-      ]),
+      ]);
+    if (embedded) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const SizedBox(height: 4),
+        Divider(color: Colors.white.withOpacity(0.08), height: 1),
+        const SizedBox(height: 10),
+        body,
+      ]);
+    }
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 4, 14, 4),
+      child: GlassCard(
+        radius: P.rTile,
+        strength: 1.1,
+        liquid: true,
+        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+        child: body,
+      ),
     );
   }
 
@@ -486,7 +490,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return GlassCard(
       margin: const EdgeInsets.fromLTRB(14, 10, 14, 8),
       padding: const EdgeInsets.fromLTRB(16, 12, 10, 14),
-      radius: 22,
+      radius: P.rTile,
+      liquid: true,
       strength: 1.15,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -516,11 +521,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 filled: false,
                 isDense: true,
                 contentPadding: EdgeInsets.only(top: 4, bottom: 2)),
-            style: const TextStyle(
-                color: Glass.text,
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8),
+            style: P.id.copyWith(fontSize: 24, height: 30 / 24),
           ).workaroundFreezeLinuxMint(),
         ),
       ]),
@@ -532,7 +533,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return GlassCard(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
       padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
-      radius: 22,
+      radius: P.rTile,
+      liquid: true,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(translate('One-time Password').toUpperCase(),
             maxLines: 1,
@@ -582,17 +584,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget _glassIconButton(IconData icon, String tip, VoidCallback onTap) {
-    return Tooltip(
-      message: tip,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(7),
-          child: Icon(icon, size: 18, color: Glass.soft),
-        ),
-      ),
-    );
+    return PortalIconButton(
+        icon: icon, tip: tip, onTap: onTap, size: P.hIconSm);
   }
 
   Widget buildPopupMenu(BuildContext context) {
@@ -771,7 +764,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  Widget buildHelpCards(String updateUrl) {
+  Widget buildHelpCards(String updateUrl, {bool embedded = false}) {
     final newVersion = bind.mainGetNewVersion();
     // Closing the card hides it for this release only; the next release shows it again.
     final closedFor = bind.mainGetLocalOption(key: 'portal-update-closed');
@@ -795,6 +788,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           btnText,
           onPressed,
           closeButton: true,
+          embedded: embedded,
           onClosed: () => bind.mainSetLocalOption(
               key: 'portal-update-closed', value: newVersion),
           help: isToUpdate ? 'Changelog' : null,
@@ -806,7 +800,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       return buildInstallCard("", systemError, "", () {});
     }
 
-    if (isWindows && !bind.isDisableInstallation()) {
+    if (isWindows && !bind.isDisableInstallation() && !kNeon) {
       if (!bind.mainIsInstalled()) {
         return buildInstallCard(
             "", bind.isOutgoingOnly() ? "" : "install_tip", "Install",
@@ -926,7 +920,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       String? link,
       bool? closeButton,
       VoidCallback? onClosed,
-      String? closeOption}) {
+      String? closeOption,
+      bool embedded = false}) {
     if (bind.mainGetBuildinOption(key: kOptionHideHelpCards) == 'Y' &&
         content != 'install_daemon_tip') {
       return const SizedBox();
@@ -949,7 +944,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
     if (kNeon) {
       return _glassInstallCard(title, content, btnText, onPressed,
-          help: help, link: link, closeButton: closeButton == true, onClose: closeCard);
+          help: help, link: link, closeButton: closeButton == true, onClose: closeCard,
+          embedded: embedded);
     }
     return Stack(
       children: [
@@ -1534,7 +1530,7 @@ class _UpdateRowState extends State<_UpdateRow> {
             child: Text('Проверить обновления',
                 style: style.copyWith(
                     color: kNeon
-                        ? Glass.cyan
+                        ? Colors.white
                         : Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600)),
           ),

@@ -250,7 +250,8 @@ class MyTheme {
   MyTheme._();
 
   static const Color grayBg = Color(0xFFEFEFF2);
-  static const Color accent = Color(0xFF0071FF);
+  static Color get accent => kNeon ? Colors.white : const Color(0xFF0071FF);
+  static Color get tabSelectedBorder => kNeon ? Colors.white : accent;
   static const Color accent50 = Color(0x770071FF);
   static const Color accent80 = Color(0xAA0071FF);
   static const Color canvasColor = Color(0xFF212121);
@@ -259,7 +260,7 @@ class MyTheme {
   static const Color darkGray = Color.fromARGB(255, 148, 148, 148);
   static const Color cmIdColor = Color(0xFF21790B);
   static const Color dark = Colors.black87;
-  static const Color button = Color(0xFF2C8CFF);
+  static Color get button => kNeon ? Colors.white : const Color(0xFF2C8CFF);
   static const Color hoverBorder = Color(0xFF999999);
 
   // ListTile
@@ -273,7 +274,20 @@ class MyTheme {
 
   static SwitchThemeData switchTheme() {
     return SwitchThemeData(
-        splashRadius: (isDesktop || isWebDesktop) ? 0 : kRadialReactionRadius);
+        splashRadius: (isDesktop || isWebDesktop) ? 0 : kRadialReactionRadius,
+        thumbColor: kNeon
+            ? MaterialStateProperty.resolveWith((states) =>
+                states.contains(MaterialState.selected) ? Colors.black : Colors.white)
+            : null,
+        trackColor: kNeon
+            ? MaterialStateProperty.resolveWith((states) =>
+                states.contains(MaterialState.selected)
+                    ? Colors.white
+                    : Colors.white.withOpacity(0.16))
+            : null,
+        trackOutlineColor: kNeon
+            ? MaterialStateProperty.all(Colors.transparent)
+            : null);
   }
 
   static RadioThemeData radioTheme() {
@@ -473,16 +487,16 @@ class MyTheme {
     useMaterial3: false,
     brightness: Brightness.dark,
     hoverColor: Color.fromARGB(255, 45, 46, 53),
-    scaffoldBackgroundColor: kNeon ? Neon.bg : Color(0xFF18191E),
-    dialogBackgroundColor: kNeon ? Neon.surface : Color(0xFF18191E),
+    scaffoldBackgroundColor: kNeon ? const Color(0xFF000000) : Color(0xFF18191E),
+    dialogBackgroundColor: kNeon ? Color(0xFF0A0A0A) : Color(0xFF18191E),
     appBarTheme: AppBarTheme(
       shadowColor: Colors.transparent,
-      backgroundColor: kNeon ? Neon.bar : null,
+      backgroundColor: kNeon ? const Color(0xFF060606) : null,
       elevation: kNeon ? 0 : null,
       centerTitle: kNeon ? true : null,
       titleTextStyle: kNeon
           ? const TextStyle(
-              color: Neon.text,
+              color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.4)
@@ -491,22 +505,39 @@ class MyTheme {
     dialogTheme: DialogTheme(
       elevation: 15,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18.0),
+        borderRadius: BorderRadius.circular(kNeon ? 26.0 : 18.0),
         side: BorderSide(
           width: 1,
-          color: kNeon ? Neon.line : Color(0xFF24252B),
+          color: kNeon ? Colors.white.withOpacity(0.08) : Color(0xFF24252B),
         ),
       ),
     ),
     scrollbarTheme: scrollbarThemeDark,
     inputDecorationTheme: (isDesktop || isWebDesktop)
         ? InputDecorationTheme(
-            fillColor: Color(0xFF24252B),
+            fillColor: kNeon ? Colors.black.withOpacity(0.3) : Color(0xFF24252B),
             filled: true,
             isDense: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(kNeon ? 12 : 8),
+              borderSide: kNeon
+                  ? BorderSide(color: Colors.white.withOpacity(0.08))
+                  : BorderSide.none,
             ),
+            enabledBorder: kNeon
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                  )
+                : null,
+            focusedBorder: kNeon
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.4)),
+                  )
+                : null,
+            hintStyle: kNeon ? TextStyle(color: Colors.white.withOpacity(0.32)) : null,
+            labelStyle: kNeon ? TextStyle(color: Colors.white.withOpacity(0.55)) : null,
           )
         : null,
     textTheme: const TextTheme(
@@ -520,7 +551,7 @@ class MyTheme {
         color: accent80,
       ),
     ),
-    cardColor: kNeon ? Neon.surface : Color(0xFF24252B),
+    cardColor: kNeon ? const Color(0xFF0A0A0A) : Color(0xFF24252B),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     tabBarTheme: const TabBarTheme(
       labelColor: Colors.white70,
@@ -528,9 +559,9 @@ class MyTheme {
     tooltipTheme: tooltipTheme(),
     bottomNavigationBarTheme: kNeon
         ? const BottomNavigationBarThemeData(
-            backgroundColor: Neon.bar,
-            selectedItemColor: Neon.cyan,
-            unselectedItemColor: Neon.muted,
+            backgroundColor: Color(0xFF060606),
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Color(0x61FFFFFF),
             type: BottomNavigationBarType.fixed,
             showUnselectedLabels: true,
           )
@@ -553,7 +584,7 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: kNeon ? Colors.white : MyTheme.accent,
-        foregroundColor: kNeon ? const Color(0xFF0B1030) : Colors.white,
+        foregroundColor: kNeon ? Colors.black : Colors.white,
         disabledForegroundColor: Colors.white70,
         disabledBackgroundColor: Colors.white10,
         shape: RoundedRectangleBorder(
@@ -580,9 +611,9 @@ class MyTheme {
         style: MenuStyle(
             backgroundColor: MaterialStatePropertyAll(Color(0xFF121212)))),
     colorScheme: ColorScheme.dark(
-      primary: kNeon ? Neon.cyan : Colors.blue,
-      secondary: kNeon ? Neon.violet : accent,
-      background: kNeon ? Neon.surface : Color(0xFF24252B),
+      primary: kNeon ? Colors.white : Colors.blue,
+      secondary: kNeon ? Colors.white : accent,
+      background: kNeon ? Color(0xFF0A0A0A) : Color(0xFF24252B),
     ),
     popupMenuTheme: PopupMenuThemeData(
         shape: RoundedRectangleBorder(
@@ -948,7 +979,7 @@ class OverlayDialogManager {
                                   style: flatButtonStyle,
                                   onPressed: cancel,
                                   child: Text(translate('Cancel'),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: MyTheme.accent)))))
                 ])),
         onCancel: showCancel ? cancel : null,

@@ -23,6 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../common.dart';
+import '../../mobile/neon_theme.dart';
 import '../../models/platform_model.dart';
 
 class PeerTabPage extends StatefulWidget {
@@ -134,10 +135,70 @@ class _PeerTabPageState extends State<PeerTabPage>
     );
   }
 
+  Widget _buildSwitchTile(BuildContext context, PeerTabModel model, int t) {
+    final selected = model.currentTab == t;
+    return Tooltip(
+          preferBelow: false,
+          message: model.tabTooltip(t),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: isOptionFixed(kOptionPeerTabIndex)
+                ? null
+                : () async {
+                    await handleTabSelection(t);
+                    await bind.setLocalFlutterOption(
+                        k: kOptionPeerTabIndex, v: t.toString());
+                  },
+            child: Container(
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: selected
+                      ? [Colors.white, const Color(0xFFDFDFE3)]
+                      : [
+                          Colors.white.withOpacity(0.1),
+                          Colors.white.withOpacity(0.02),
+                        ],
+                ),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6)),
+                      ]
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Icon(model.tabIcon(t),
+                  size: 17,
+                  color: selected ? Colors.black : Colors.white.withOpacity(0.7)),
+            ),
+          ),
+        );
+  }
+
   Widget _createSwitchBar(BuildContext context) {
     final model = Provider.of<PeerTabModel>(context);
+    if (kNeon) {
+      return SizedBox(
+        height: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final t in model.visibleEnabledOrderedIndexs)
+              _buildSwitchTile(context, model, t),
+          ],
+        ),
+      );
+    }
     var counter = -1;
-    return ReorderableListView(
+    final list = ReorderableListView(
         buildDefaultDragHandles: false,
         onReorder: model.reorder,
         scrollDirection: Axis.horizontal,
@@ -165,7 +226,38 @@ class _PeerTabPageState extends State<PeerTabPage>
                     message: model.tabTooltip(t),
                     onTriggered: isMobile ? mobileShowTabVisibilityMenu : null,
                     child: InkWell(
-                      child: Container(
+                      child: kNeon
+                          ? Container(
+                              width: 36,
+                              height: 36,
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: selected
+                                      ? [Colors.white, const Color(0xFFDFDFE3)]
+                                      : [
+                                          Colors.white.withOpacity(0.1),
+                                          Colors.white.withOpacity(0.02),
+                                        ],
+                                ),
+                                boxShadow: selected
+                                    ? [
+                                        BoxShadow(
+                                            color: Colors.black.withOpacity(0.5),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 6)),
+                                      ]
+                                    : null,
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(model.tabIcon(t),
+                                  size: 17,
+                                  color: selected ? Colors.black : Colors.white.withOpacity(0.7)),
+                            )
+                          : Container(
                         decoration: (hover.value
                             ? (selected ? decoBorder : deco)
                             : (selected ? decoBorder : null)),
@@ -183,6 +275,7 @@ class _PeerTabPageState extends State<PeerTabPage>
                     ),
                   )));
         }).toList());
+    return SizedBox(height: 32, child: list);
   }
 
   Widget _createPeersView() {
@@ -347,7 +440,7 @@ class _PeerTabPageState extends State<PeerTabPage>
         items: menu
             .map((entry) => entry.build(
                 context,
-                const MenuConfig(
+                MenuConfig(
                   commonColor: MyTheme.accent,
                   height: 20.0,
                   dividerHeight: 12.0,
@@ -697,8 +790,13 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
     return Obx(() => Container(
           width: stateGlobal.isPortrait.isTrue ? 120 : 140,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
-            borderRadius: BorderRadius.circular(6),
+            color: kNeon
+                ? Colors.black.withOpacity(0.35)
+                : Theme.of(context).colorScheme.background,
+            borderRadius: BorderRadius.circular(kNeon ? 10 : 6),
+            border: kNeon
+                ? Border.all(color: Colors.white.withOpacity(0.08))
+                : null,
           ),
           child: Row(
             children: [

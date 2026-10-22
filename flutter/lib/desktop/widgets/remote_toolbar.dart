@@ -17,6 +17,7 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:window_size/window_size.dart' as window_size;
 
 import '../../common.dart';
+import '../../mobile/neon_theme.dart';
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../../common/shared_state.dart';
@@ -324,10 +325,13 @@ class ToolbarState {
 }
 
 class _ToolbarTheme {
-  static const Color blueColor = MyTheme.button;
-  static const Color hoverBlueColor = MyTheme.accent;
-  static Color inactiveColor = Colors.grey[800]!;
-  static Color hoverInactiveColor = Colors.grey[850]!;
+  static Color get blueColor => kNeon ? Colors.white : MyTheme.button;
+  static Color get hoverBlueColor =>
+      kNeon ? Colors.white.withOpacity(0.82) : MyTheme.accent;
+  static Color get inactiveColor =>
+      kNeon ? Colors.white.withOpacity(0.08) : Colors.grey[800]!;
+  static Color get hoverInactiveColor =>
+      kNeon ? Colors.white.withOpacity(0.15) : Colors.grey[850]!;
 
   static const Color redColor = Colors.redAccent;
   static const Color hoverRedColor = Colors.red;
@@ -851,7 +855,8 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     }
     if (!isWeb) toolbarItems.add(_RecordMenu());
     toolbarItems.add(_CloseMenu(id: widget.id, ffi: widget.ffi));
-    final toolbarBorderRadius = BorderRadius.all(Radius.circular(4.0));
+    final toolbarBorderRadius =
+        BorderRadius.all(Radius.circular(kNeon ? 20.0 : 4.0));
     // innerAxis: how the toolbar icons themselves flow.
     // outerAxis: how the toolbar block and the handle stack against each other
     // (perpendicular to the dock edge, so the handle hangs off the interior face).
@@ -861,19 +866,49 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
         ? SizedBox(width: _ToolbarTheme.buttonHMargin * 2)
         : SizedBox(height: _ToolbarTheme.buttonHMargin * 2);
     final toolbarMaterial = Material(
-      elevation: _ToolbarTheme.elevation,
-      shadowColor: MyTheme.color(context).shadow,
+      elevation: kNeon ? 0 : _ToolbarTheme.elevation,
+      shadowColor: kNeon ? Colors.transparent : MyTheme.color(context).shadow,
       borderRadius: toolbarBorderRadius,
-      color: Theme.of(context)
-          .menuBarTheme
-          .style
-          ?.backgroundColor
-          ?.resolve(MaterialState.values.toSet()),
-      child: SingleChildScrollView(
+      color: kNeon
+          ? Colors.transparent
+          : Theme.of(context)
+              .menuBarTheme
+              .style
+              ?.backgroundColor
+              ?.resolve(MaterialState.values.toSet()),
+      child: Container(
+        decoration: kNeon
+            ? BoxDecoration(
+                borderRadius: toolbarBorderRadius,
+                color: Colors.black.withOpacity(0.5),
+                border: Border.all(color: Colors.white.withOpacity(0.09)),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.55),
+                      blurRadius: 30,
+                      offset: const Offset(0, 14)),
+                  BoxShadow(
+                      color: Colors.white.withOpacity(0.06),
+                      blurRadius: 0,
+                      offset: const Offset(0, 1)),
+                ],
+              )
+            : null,
+        child: SingleChildScrollView(
         scrollDirection: innerAxis,
         child: Theme(
           data: themeData(),
-          child: _ToolbarTheme.borderWrapper(
+          child: kNeon
+              ? Flex(
+                  direction: innerAxis,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    spacer,
+                    ...toolbarItems,
+                    spacer,
+                  ],
+                )
+              : _ToolbarTheme.borderWrapper(
               context,
               Flex(
                 direction: innerAxis,
@@ -886,6 +921,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
               ),
               toolbarBorderRadius),
         ),
+      ),
       ),
     );
     final handle = _buildDraggableCollapse(context, edge, isHorizontal);
@@ -3536,7 +3572,8 @@ class _DraggableShowHideState extends State<_DraggableShowHide> {
     const double iconSize = 20;
 
     buttonWrapper(VoidCallback? onPressed, Widget child,
-        {Color hoverColor = _ToolbarTheme.blueColor}) {
+        {Color? hoverColor}) {
+      hoverColor ??= _ToolbarTheme.blueColor;
       final bgColor = buttonStyle.backgroundColor?.resolve({});
       return TextButton(
         onPressed: onPressed,
@@ -3544,7 +3581,7 @@ class _DraggableShowHideState extends State<_DraggableShowHide> {
         style: buttonStyle.copyWith(
           backgroundColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.hovered)) {
-              return (bgColor ?? hoverColor).withOpacity(0.15);
+              return (bgColor ?? hoverColor!).withOpacity(0.15);
             }
             return bgColor;
           }),

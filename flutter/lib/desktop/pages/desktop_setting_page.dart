@@ -38,7 +38,7 @@ const double _kRadioLeftMargin = 10;
 const double _kListViewBottomMargin = 15;
 const double _kTitleFontSize = 20;
 const double _kContentFontSize = 15;
-const Color _accentColor = MyTheme.accent;
+Color get _accentColor => kNeon ? Colors.white : MyTheme.accent;
 const String _kSettingPageControllerTag = 'settingPageController';
 const String _kSettingPageTabKeyTag = 'settingPageTabKey';
 
@@ -309,10 +309,10 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
     final tabs = _settingTabs();
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: _buildBlockColumn(children: <Widget>[
+      body: _buildBlockRow(children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
-          child: Obx(() => PortalTopNav(
+          padding: const EdgeInsets.fromLTRB(20, 20, 0, 20),
+          child: Obx(() => PortalSideNav(
                 items: [
                   for (final t in tabs)
                     PortalNavItem(translate(t.label), _tabGlyph(t.key)),
@@ -357,11 +357,30 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
     });
   }
 
+  Widget _buildBlockRow({required List<Widget> children}) {
+    return Obx(() {
+      final videoConnBlock =
+          _canBeBlocked.value && stateGlobal.videoConnCount > 0;
+      return Stack(children: [
+        buildRemoteBlock(
+          block: _block,
+          mask: false,
+          use: canBeBlocked,
+          child: preventMouseKeyBuilder(
+            child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+            block: videoConnBlock,
+          ),
+        ),
+        if (videoConnBlock) Container(color: Colors.black.withOpacity(0.5)),
+      ]);
+    });
+  }
+
   Widget _header(BuildContext context) {
     final settingsText = Text(
       translate('Settings'),
       textAlign: TextAlign.left,
-      style: const TextStyle(
+      style: TextStyle(
         color: _accentColor,
         fontSize: _kTitleFontSize,
         fontWeight: FontWeight.w400,
@@ -2649,7 +2668,8 @@ class _AboutState extends State<_About> {
                     style: linkStyle,
                   ).marginSymmetric(vertical: 4.0)),
               Container(
-                decoration: const BoxDecoration(color: Color(0xFF2c8cff)),
+                decoration: BoxDecoration(
+                    color: kNeon ? Colors.white.withOpacity(0.08) : const Color(0xFF2c8cff)),
                 padding:
                     const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
                 child: SelectionArea(
@@ -3098,6 +3118,39 @@ Widget _lock(
   String label,
   Function() onUnlock,
 ) {
+  doUnlock() async {
+    final unlockPin = bind.mainGetUnlockPin();
+    if (unlockPin.isEmpty || isUnlockPinDisabled()) {
+      bool checked = await callMainCheckSuperUserPermission();
+      if (checked) {
+        onUnlock();
+      }
+    } else {
+      checkUnlockPinDialog(unlockPin, onUnlock);
+    }
+  }
+
+  if (kNeon) {
+    return Offstage(
+      offstage: !locked,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 780),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 7, 20, 7),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: PortalButton(
+                icon: 'lock',
+                label: translate(label),
+                onPressed: doUnlock,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   return Offstage(
       offstage: !locked,
       child: Row(

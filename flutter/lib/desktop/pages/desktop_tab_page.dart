@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/mobile/glass/glass.dart';
 import 'package:flutter_hbb/mobile/neon_theme.dart';
+import 'package:flutter_hbb/desktop/glass/portal_ui.dart';
 import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
@@ -91,7 +92,8 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
     super.dispose();
   }
 
-  Widget _aurora(Widget child) => kNeon ? AuroraBackground(child: child) : child;
+  Widget _aurora(Widget child) =>
+      kNeon ? DesktopAuroraBackground(child: child) : child;
 
   @override
   Widget build(BuildContext context) {

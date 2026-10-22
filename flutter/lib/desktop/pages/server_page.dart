@@ -18,6 +18,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../common.dart';
 import '../../common/widgets/chat_page.dart';
+import '../../mobile/neon_theme.dart';
+import '../glass/portal_ui.dart';
 import '../../models/file_model.dart';
 import '../../models/platform_model.dart';
 import '../../models/server_model.dart';
@@ -204,7 +206,7 @@ class ConnectionManagerState extends State<ConnectionManager>
               showClose: true,
               onWindowCloseButton: handleWindowCloseButton,
               controller: serverModel.tabController,
-              selectedBorderColor: MyTheme.accent,
+              selectedBorderColor: MyTheme.tabSelectedBorder,
               maxLabelWidth: 100,
               tail: null, //buildScrollJumper(),
               tabBuilder: (key, icon, label, themeConf) {
@@ -456,7 +458,19 @@ class _CmHeaderState extends State<_CmHeader>
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      decoration: BoxDecoration(
+      decoration: kNeon
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(18.0),
+              color: Colors.black.withOpacity(0.45),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.55),
+                    blurRadius: 30,
+                    offset: const Offset(0, 14)),
+              ],
+            )
+          : BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
         gradient: LinearGradient(
           begin: Alignment.topRight,
@@ -597,7 +611,22 @@ class _CmHeaderState extends State<_CmHeader>
       width: 70,
       height: 70,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
+      decoration: kNeon
+          ? BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF3A3A3E), Color(0xFF0A0A0B)],
+              ),
+              borderRadius: BorderRadius.circular(15.0),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8)),
+              ],
+            )
+          : BoxDecoration(
         color: str2color(client.name),
         borderRadius: BorderRadius.circular(15.0),
       ),
@@ -631,7 +660,29 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
       message: "$tooltipText: ${enabled ? "ON" : "OFF"}",
       waitDuration: Duration.zero,
       child: Container(
-        decoration: BoxDecoration(
+        decoration: kNeon
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(P.rCtl),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: enabled
+                      ? [Colors.white, const Color(0xFFDFDFE3)]
+                      : [
+                          Colors.white.withOpacity(canModify ? 0.1 : 0.05),
+                          Colors.white.withOpacity(canModify ? 0.02 : 0.01),
+                        ],
+                ),
+                boxShadow: enabled
+                    ? [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6)),
+                      ]
+                    : null,
+              )
+            : BoxDecoration(
           color: enabled
               ? (canModify ? MyTheme.accent : MyTheme.accent.withOpacity(0.6))
               : Colors.grey[700],
@@ -649,7 +700,9 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
               Expanded(
                 child: Icon(
                   iconData,
-                  color: Colors.white,
+                  color: kNeon
+                      ? (enabled ? Colors.black : Colors.white.withOpacity(0.6))
+                      : Colors.white,
                 ),
               ),
             ],
@@ -671,7 +724,19 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
       height: 160.0,
       margin: EdgeInsets.all(5.0),
       padding: EdgeInsets.all(5.0),
-      decoration: BoxDecoration(
+      decoration: kNeon
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(18.0),
+              color: Colors.black.withOpacity(0.45),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12)),
+              ],
+            )
+          : BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
         color: Theme.of(context).colorScheme.background,
         boxShadow: [
@@ -688,7 +753,10 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
         children: [
           Text(
             translate("Permissions"),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: kNeon ? Colors.white : null),
             textAlign: TextAlign.center,
           ).marginOnly(left: 4.0, bottom: 8.0),
           Expanded(

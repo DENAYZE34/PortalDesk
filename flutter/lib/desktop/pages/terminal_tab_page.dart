@@ -483,7 +483,7 @@ class _TerminalTabPageState extends State<TerminalTabPage> {
       items: menu
           .map((e) => e.build(
                 context,
-                const MenuConfig(
+                MenuConfig(
                   commonColor: CustomPopupMenuTheme.commonColor,
                   height: CustomPopupMenuTheme.height,
                   dividerHeight: CustomPopupMenuTheme.dividerHeight,
@@ -736,7 +736,7 @@ class _TerminalTabPageState extends State<TerminalTabPage> {
           controller: tabController,
           onWindowCloseButton: handleWindowCloseButton,
           tail: _buildAddButton(),
-          selectedBorderColor: MyTheme.accent,
+          selectedBorderColor: MyTheme.tabSelectedBorder,
           labelGetter: DesktopTab.tablabelGetter,
           tabMenuBuilder: (key) {
             final parsed = _parseTabKey(key);

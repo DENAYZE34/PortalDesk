@@ -24,7 +24,7 @@ import 'package:bot_toast/bot_toast.dart';
 import '../../models/platform_model.dart';
 
 class _MenuTheme {
-  static const Color blueColor = MyTheme.button;
+  static Color get blueColor => MyTheme.button;
   // kMinInteractiveDimension
   static const double height = 20.0;
   static const double dividerHeight = 12.0;
@@ -136,7 +136,7 @@ class _ViewCameraTabPageState extends State<ViewCameraTabPage> {
         controller: tabController,
         onWindowCloseButton: handleWindowCloseButton,
         tail: const AddButton(),
-        selectedBorderColor: MyTheme.accent,
+        selectedBorderColor: MyTheme.tabSelectedBorder,
         pageViewBuilder: (pageView) => pageView,
         labelGetter: DesktopTab.tablabelGetter,
         tabBuilder: (key, icon, label, themeConf) => Obx(() {
@@ -314,7 +314,7 @@ class _ViewCameraTabPageState extends State<ViewCameraTabPage> {
       items: menu
           .map((entry) => entry.build(
               context,
-              const MenuConfig(
+              MenuConfig(
                 commonColor: _MenuTheme.blueColor,
                 height: _MenuTheme.height,
                 dividerHeight: _MenuTheme.dividerHeight,

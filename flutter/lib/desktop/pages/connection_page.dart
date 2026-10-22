@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter_hbb/mobile/glass/glass.dart';
+import 'package:flutter_hbb/desktop/glass/portal_ui.dart';
 import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'dart:convert';
 import 'dart:math';
@@ -308,6 +309,35 @@ class _ConnectionPageState extends State<ConnectionPage>
   @override
   Widget build(BuildContext context) {
     final isOutgoingOnly = bind.isOutgoingOnly();
+    if (kNeon) {
+      return Column(
+        children: [
+          Expanded(
+              child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.leading != null)
+                SizedBox(
+                  width: 320,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        widget.leading!,
+                        const SizedBox(height: 10),
+                        _buildRemoteIDTextField(context),
+                      ],
+                    ),
+                  ),
+                ).paddingOnly(top: 8, left: 12),
+              Expanded(child: PeerTabPage().paddingOnly(left: 4, top: 8)),
+            ],
+          )),
+          if (!isOutgoingOnly) const Divider(height: 1),
+          if (!isOutgoingOnly) OnlineStatusWidget()
+        ],
+      );
+    }
     return Column(
       children: [
         Expanded(
@@ -316,12 +346,11 @@ class _ConnectionPageState extends State<ConnectionPage>
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (kNeon && widget.leading != null) widget.leading!,
                 Flexible(child: _buildRemoteIDTextField(context)),
               ],
-            ).marginOnly(top: kNeon ? 8 : 22),
-            SizedBox(height: kNeon ? 14 : 12),
-            if (!kNeon) Divider().paddingOnly(right: 12),
+            ).marginOnly(top: 22),
+            SizedBox(height: 12),
+            Divider().paddingOnly(right: 12),
             Expanded(child: PeerTabPage()),
           ],
         ).paddingOnly(left: 12.0)),
@@ -348,9 +377,10 @@ class _ConnectionPageState extends State<ConnectionPage>
 
   Widget _glassFrame({required Widget child}) => kNeon
       ? GlassCard(
-          radius: 20,
+          radius: P.rCard,
           strength: 1.15,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          liquid: true,
+          padding: const EdgeInsets.fromLTRB(P.s20, P.s16, P.s20, P.s16),
           child: child)
       : Ink(child: child);
 
@@ -358,7 +388,7 @@ class _ConnectionPageState extends State<ConnectionPage>
   /// Search for a peer.
   Widget _buildRemoteIDTextField(BuildContext context) {
     var w = Container(
-      width: 320 + 20 * 2,
+      width: kNeon ? null : 320 + 20 * 2,
       padding: kNeon
           ? EdgeInsets.zero
           : const EdgeInsets.fromLTRB(20, 24, 20, 22),
@@ -372,8 +402,28 @@ class _ConnectionPageState extends State<ConnectionPage>
         child: Column(
           children: [
             getConnectionPageTitle(context, false).marginOnly(bottom: 15),
-            Row(
+            Container(
+              decoration: kNeon
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(P.rCtl),
+                      color: Colors.black.withOpacity(0.3),
+                      border: Border.all(color: Colors.white.withOpacity(0.08)),
+                      boxShadow: const [
+                        BoxShadow(
+                            color: Color(0x80000000),
+                            blurRadius: 6,
+                            spreadRadius: -2,
+                            offset: Offset(0, 2)),
+                      ],
+                    )
+                  : null,
+              padding: kNeon ? const EdgeInsets.only(left: 14) : EdgeInsets.zero,
+              child: Row(
               children: [
+                if (kNeon) ...[
+                  PortalGlyph('globe', size: 16, color: Glass.muted),
+                  const SizedBox(width: 10),
+                ],
                 Expanded(
                     child: RawAutocomplete<Peer>(
                   optionsBuilder: (TextEditingValue textEditingValue) {
@@ -505,7 +555,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                             ],
                           ),
                           child: ClipRRect(
-                              borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(P.rCtl),
                               child: Material(
                                 elevation: 4,
                                 child: ConstrainedBox(
@@ -542,8 +592,9 @@ class _ConnectionPageState extends State<ConnectionPage>
                 )),
               ],
             ),
+            ),
             Padding(
-              padding: const EdgeInsets.only(top: 13.0),
+              padding: const EdgeInsets.only(top: P.s12),
               child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 kNeon
                     ? GlassButton(
@@ -564,12 +615,29 @@ class _ConnectionPageState extends State<ConnectionPage>
                   height: kNeon ? 38.0 : 28.0,
                   width: kNeon ? 38.0 : 28.0,
                   decoration: BoxDecoration(
-                    color: kNeon ? Glass.fill(0.12) : null,
+                    gradient: kNeon
+                        ? LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Glass.fill(0.16), Glass.fill(0.04)])
+                        : null,
                     border: Border.all(
                         color: kNeon
                             ? Glass.edge()
                             : Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(kNeon ? 99 : 8),
+                    boxShadow: kNeon
+                        ? [
+                            BoxShadow(
+                                color: Colors.white.withOpacity(0.2),
+                                blurRadius: 0,
+                                offset: const Offset(0, 1)),
+                            BoxShadow(
+                                color: Colors.black.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4)),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     child: StatefulBuilder(
@@ -629,7 +697,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                                           ))
                                       .map((e) => e.build(
                                           context,
-                                          const MenuConfig(
+                                          MenuConfig(
                                               commonColor: CustomPopupMenuTheme
                                                   .commonColor,
                                               height:

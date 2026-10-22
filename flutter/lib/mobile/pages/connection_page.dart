@@ -352,7 +352,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                 height: 60,
                 child: IconButton(
                   icon: Icon(Icons.arrow_forward,
-                      color: kNeon ? Neon.cyan : MyTheme.darkGray, size: 45),
+                      color: kNeon ? Colors.white : MyTheme.darkGray, size: 45),
                   onPressed: onConnect,
                 ),
               ),
@@ -432,6 +432,7 @@ class _LastDeviceHeroState extends State<_LastDeviceHero> {
       padding: const EdgeInsets.all(22),
       radius: 32,
       strength: 1.2,
+      animate: true,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           StatusDot(
@@ -457,7 +458,8 @@ class _LastDeviceHeroState extends State<_LastDeviceHero> {
           GlassButton(
               label: 'Подключиться',
               icon: Icons.arrow_outward_rounded,
-              onPressed: () => connect(context, p.id)),
+              onPressed: () => connect(context, p.id),
+              animate: true),
         ],
       ]),
     );

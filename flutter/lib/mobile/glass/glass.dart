@@ -1,17 +1,16 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-/// PortalDesk "glass" design system: frosted panels over a living violet and
-/// cyan aurora. Pure Flutter, no app dependencies, so it can be previewed on
-/// its own.
+/// PortalDesk "glass" design system: black and white only, no accent hues
+/// (owner decision, see docs/design-glass.md). Pure Flutter, no app
+/// dependencies, so it can be previewed on its own.
 class Glass {
-  static const Color base = Color(0xFF070A1F);
-  static const Color violet = Color(0xFF8B5CF6);
-  static const Color cyan = Color(0xFF22D3EE);
-  static const Color text = Color(0xFFF2F4FF);
-  static const Color soft = Color(0xFFC9CFEE);
-  static const Color muted = Color(0xFF8C95C4);
+  static const Color base = Color(0xFF050507);
+  static const Color text = Color(0xFFF2F2F2);
+  static const Color soft = Color(0xFFC9C9C9);
+  static const Color muted = Color(0xFF8C8C8C);
   static const Color ok = Color(0xFF34D399);
   static const Color warn = Color(0xFFFBBF24);
   static const Color bad = Color(0xFFF87171);
@@ -23,7 +22,7 @@ class Glass {
   static const double rPill = 99;
 }
 
-/// Full-screen aurora background. Put it under everything.
+/// Full-screen background. Put it under everything.
 class AuroraBackground extends StatelessWidget {
   final Widget child;
   const AuroraBackground({super.key, required this.child});
@@ -32,35 +31,10 @@ class AuroraBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(children: [
       const Positioned.fill(
-          child: IgnorePointer(child: CustomPaint(painter: _AuroraPainter()))),
+          child: IgnorePointer(child: ColoredBox(color: Glass.base))),
       Positioned.fill(child: child),
     ]);
   }
-}
-
-class _AuroraPainter extends CustomPainter {
-  const _AuroraPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = Glass.base);
-    void spot(double fx, double fy, double rw, Color c, double o) {
-      final center = Offset(size.width * fx, size.height * fy);
-      final r = size.width * rw;
-      final shader = RadialGradient(
-        colors: [c.withOpacity(o), c.withOpacity(o * 0.3), c.withOpacity(0)],
-        stops: const [0, 0.5, 1],
-      ).createShader(Rect.fromCircle(center: center, radius: r));
-      canvas.drawCircle(center, r, Paint()..shader = shader);
-    }
-
-    spot(0.0, 0.0, 0.95, Glass.violet, 0.55);
-    spot(1.0, 0.2, 0.75, Glass.cyan, 0.3);
-    spot(0.85, 1.0, 0.95, Glass.violet, 0.42);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// A frosted panel.
@@ -72,6 +46,15 @@ class GlassCard extends StatelessWidget {
   final double blur;
   final double strength;
   final VoidCallback? onTap;
+  /// Opt-in "liquid glass" depth: inset highlight, drop shadow, top-left
+  /// specular glare. Off by default so existing (phone) call sites are
+  /// unchanged; desktop passes true.
+  final bool liquid;
+  /// Opt-in entrance animation (fade + slide-up). Off by default so existing
+  /// call sites, including the ones GlassNavBar/GlassDock rebuild per frame,
+  /// are unaffected.
+  final bool animate;
+  final Duration animateDelay;
   const GlassCard(
       {super.key,
       required this.child,
@@ -80,33 +63,85 @@ class GlassCard extends StatelessWidget {
       this.radius = Glass.rCard,
       this.blur = 22,
       this.strength = 1,
-      this.onTap});
+      this.onTap,
+      this.liquid = false,
+      this.animate = false,
+      this.animateDelay = Duration.zero});
 
   @override
   Widget build(BuildContext context) {
     final r = BorderRadius.circular(radius);
+    Widget inner = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        borderRadius: r,
+        color: liquid ? Colors.black.withOpacity(0.35 * strength) : null,
+        gradient: liquid
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Glass.fill(0.14 * strength), Glass.fill(0.05 * strength)],
+              ),
+        border: Border.all(
+            color: Glass.edge((liquid ? 0.09 : 0.18) * strength), width: 1),
+        boxShadow: liquid
+            ? [
+                BoxShadow(
+                    color: Colors.white.withOpacity(0.22 * strength),
+                    blurRadius: 0,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 1)),
+              ]
+            : null,
+      ),
+      child: child,
+    );
+    if (liquid) {
+      inner = Stack(children: [
+        inner,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: r,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.7, -1.2),
+                  radius: 1.1,
+                  colors: [
+                    Colors.white.withOpacity(0.14 * strength),
+                    Colors.white.withOpacity(0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]);
+    }
     Widget body = ClipRRect(
       borderRadius: r,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            borderRadius: r,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Glass.fill(0.14 * strength),
-                Glass.fill(0.05 * strength)
-              ],
-            ),
-            border: Border.all(color: Glass.edge(0.18 * strength), width: 1),
-          ),
-          child: child,
-        ),
+        child: inner,
       ),
     );
+    if (liquid) {
+      body = Container(
+        decoration: BoxDecoration(borderRadius: r, boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.65),
+              blurRadius: 50,
+              spreadRadius: -8,
+              offset: const Offset(0, 24)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 3)),
+        ]),
+        child: body,
+      );
+    }
     if (onTap != null) {
       body = Material(
         type: MaterialType.transparency,
@@ -114,7 +149,14 @@ class GlassCard extends StatelessWidget {
             borderRadius: r, onTap: onTap, child: body),
       );
     }
-    return margin == null ? body : Padding(padding: margin!, child: body);
+    Widget result = margin == null ? body : Padding(padding: margin!, child: body);
+    if (animate) {
+      result = result
+          .animate(delay: animateDelay)
+          .fadeIn(duration: 300.ms)
+          .slideY(begin: 0.08, end: 0, duration: 300.ms, curve: Curves.easeOut);
+    }
+    return result;
   }
 }
 
@@ -124,57 +166,130 @@ class GlassButton extends StatelessWidget {
   final IconData? icon;
   final VoidCallback? onPressed;
   final bool filled;
+  final bool dense;
+  /// Opt-in scale-down press feedback. Off by default so existing call
+  /// sites are unaffected.
+  final bool animate;
   const GlassButton(
       {super.key,
       required this.label,
       this.icon,
       this.onPressed,
-      this.filled = true});
+      this.filled = true,
+      this.dense = false,
+      this.animate = false});
 
   @override
   Widget build(BuildContext context) {
-    final fg = filled ? const Color(0xFF0B1030) : Glass.text;
+    final button = _buildButton(context);
+    return animate ? _PressScale(child: button) : button;
+  }
+
+  Widget _buildButton(BuildContext context) {
+    final fg = filled ? Colors.black : Glass.text;
+    final shape = const StadiumBorder();
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Glass.rPill),
         boxShadow: filled
             ? [
                 BoxShadow(
-                    color: Glass.violet.withOpacity(0.55),
-                    blurRadius: 28,
-                    offset: const Offset(0, 8))
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10)),
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.35),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2)),
               ]
             : null,
       ),
-      child: Material(
-        color: filled ? Colors.white : Glass.fill(0.12),
-        shape: StadiumBorder(
-            side: filled ? BorderSide.none : BorderSide(color: Glass.edge())),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 20, color: fg),
-                  const SizedBox(width: 8)
-                ],
-                Flexible(
-                  child: Text(label,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: fg,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16)),
-                ),
+      child: Stack(children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Glass.rPill),
+              color: filled ? Colors.white : null,
+              gradient: filled
+                  ? null
+                  : LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Glass.fill(0.16), Glass.fill(0.04)],
+                    ),
+              border: filled ? null : Border.all(color: Glass.edge()),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.white.withOpacity(filled ? 1 : 0.2),
+                    blurRadius: 0,
+                    offset: const Offset(0, 1)),
               ],
             ),
           ),
         ),
+        Material(
+          color: Colors.transparent,
+          shape: shape,
+          child: InkWell(
+            customBorder: shape,
+            onTap: onPressed,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                  vertical: dense ? 9 : 15, horizontal: dense ? 14 : 22),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: dense ? 15 : 20, color: fg),
+                    SizedBox(width: dense ? 5 : 8)
+                  ],
+                  Flexible(
+                    child: Text(label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: fg,
+                            fontWeight: FontWeight.w700,
+                            fontSize: dense ? 13 : 16)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+/// Scale-down-on-press wrapper, used by [GlassButton] when `animate: true`.
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  const _PressScale({required this.child});
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) => _setPressed(true),
+      onPointerUp: (_) => _setPressed(false),
+      onPointerCancel: (_) => _setPressed(false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.94 : 1,
+        duration: 120.ms,
+        curve: Curves.easeOut,
+        child: widget.child,
       ),
     );
   }
@@ -396,14 +511,14 @@ class GlassDock extends StatelessWidget {
                     boxShadow: it.primary
                         ? [
                             BoxShadow(
-                                color: Glass.violet.withOpacity(0.6),
+                                color: Colors.black.withOpacity(0.5),
                                 blurRadius: 16)
                           ]
                         : null,
                   ),
                   child: Icon(it.icon,
                       size: 21,
-                      color: it.primary ? const Color(0xFF0B1030) : Colors.white),
+                      color: it.primary ? Colors.black : Colors.white),
                 ),
               ),
             ),

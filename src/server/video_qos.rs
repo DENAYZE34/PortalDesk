@@ -12,8 +12,9 @@ b. TestDelay reply => update the user's fps from the excess delay, the reply's d
    above the baseline this connection has shown so far:
      startup: two consecutive replies with excess < 50 ms permit doubling toward
        the viewer's cap; a higher excess or a brake ends this acceleration;
-     excess < DELAY_THRESHOLD_150MS: a good reply; grows the fps, and after a
-       reduction returns to the level held before it after two good replies;
+     excess < DELAY_THRESHOLD_150MS: a good reply; grows the fps faster than before
+       a reduction, and after a reduction returns to the level held before it
+       after two good replies;
      excess >= DELAY_THRESHOLD_150MS: a bad reply; nothing happens until three in a
        row confirm congestion, including after each reduction. FPS drops by a
        fifth at most; a second of excess cannot wait and halves it immediately.
@@ -64,7 +65,7 @@ const HISTORY_DELAY_LEN: usize = 2;
 const ADJUST_RATIO_INTERVAL: usize = 3; // Adjust quality ratio every 3 seconds
 const DYNAMIC_SCREEN_THRESHOLD: usize = 2; // Allow increase quality ratio if encode more than 2 times in one second
 const DELAY_THRESHOLD_150MS: u32 = 150; // 150ms is the threshold for good network condition
-const RESTORE_GUARD_SAMPLES: u8 = 5; // A restored level that congests this soon is lowered
+const RESTORE_GUARD_SAMPLES: u8 = 3; // A restored level that congests this soon is lowered
 
 #[derive(Default, Debug, Clone)]
 struct UserDelay {
@@ -156,7 +157,7 @@ impl UserDelay {
     // Fresh low-delay replies permit recovery even while the average contains a spike:
     // a little at first, then back to the level held before congestion.
     fn recover(&mut self, current_fps: u32, fps: u32) -> u32 {
-        let gradual = current_fps + (current_fps / 10).max(1);
+        let gradual = current_fps + (current_fps / 6).max(1);
         let level = self
             .fps_before_congestion
             .filter(|level| *level > current_fps);
@@ -168,7 +169,7 @@ impl UserDelay {
             }
             (3, None) => {
                 self.fps_before_congestion = None;
-                fps.max(current_fps + (current_fps / 5).max(2))
+                fps.max(current_fps + (current_fps / 3).max(2))
             }
             _ => gradual,
         }
@@ -774,14 +775,14 @@ impl VideoQoS {
             v = current_ratio * factor;
         } else if max_delay < 50 {
             if dynamic_screen {
-                v = current_ratio * 1.15;
+                v = current_ratio * 1.2;
             }
         } else if max_delay < 100 {
             if dynamic_screen {
-                v = current_ratio * 1.1;
+                v = current_ratio * 1.15;
             }
         } else if dynamic_screen {
-            v = current_ratio * 1.05;
+            v = current_ratio * 1.08;
         }
 
         // Limit quality increase rate for better stability
@@ -993,12 +994,12 @@ mod tests {
         }
         assert!(qos.fps() < FPS);
         qos.user_network_delay(1, 10);
-        qos.user_network_delay(1, 10);
         assert!(
             qos.fps() < FPS,
-            "no return to the level that failed: {}",
+            "no immediate jump back to the level that failed: {}",
             qos.fps()
         );
+        qos.user_network_delay(1, 10);
         qos.user_network_delay(1, 10);
         assert_eq!(qos.fps(), FPS, "ordinary recovery can still reach the cap");
     }

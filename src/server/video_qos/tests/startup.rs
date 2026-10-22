@@ -55,7 +55,7 @@ fn an_unclean_startup_reply_disables_faster_growth() {
             let before = qos.fps();
             reply(&mut qos, 10);
             assert!(
-                qos.fps() <= before + (before / 5).max(6),
+                qos.fps() <= before + (before / 3).max(6),
                 "excess={excess}: startup acceleration restarted: {before} -> {}",
                 qos.fps()
             );
@@ -80,7 +80,7 @@ fn a_failed_startup_probe_rolls_back_and_does_not_restart() {
     for _ in 0..8 {
         let before = qos.fps();
         reply(&mut qos, 10);
-        assert!(qos.fps() <= before + (before / 5).max(6));
+        assert!(qos.fps() <= before + (before / 3).max(6));
     }
 }
 
@@ -115,7 +115,7 @@ fn a_startup_timeout_keeps_legacy_recovery() {
     for _ in 0..8 {
         let before = qos.fps();
         reply(&mut qos, 10);
-        assert!(qos.fps() <= before + (before / 5).max(6));
+        assert!(qos.fps() <= before + (before / 3).max(6));
     }
 }
 
@@ -130,7 +130,7 @@ fn raising_the_cap_does_not_restart_startup_acceleration() {
     for _ in 0..6 {
         let before = qos.fps();
         reply(&mut qos, 10);
-        assert!(qos.fps() <= before + (before / 5).max(6));
+        assert!(qos.fps() <= before + (before / 3).max(6));
     }
 }
 

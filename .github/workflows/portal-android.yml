@@ -253,15 +253,19 @@ jobs:
         shell: bash
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-          ANDROID_DEBUG_KEYSTORE_B64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_B64 }}
+          PORTAL_RELEASE_KEYSTORE_B64: ${{ secrets.PORTAL_RELEASE_KEYSTORE_B64 }}
+          PORTAL_RELEASE_KEYSTORE_PW: ${{ secrets.PORTAL_RELEASE_KEYSTORE_PW }}
         run: |
           export PATH=/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
           # Increase Gradle JVM memory for CI builds
           sed -i "s/org.gradle.jvmargs=-Xmx1024M/org.gradle.jvmargs=-Xmx2g/g" ./flutter/android/gradle.properties
           # Sign the release with our own key (secret) so every build installs over the previous one.
           # The release config in build.gradle reads flutter/android/key.properties.
-          echo "$ANDROID_DEBUG_KEYSTORE_B64" | base64 -d > "$GITHUB_WORKSPACE/portal.keystore"
-          printf "storeFile=%s\nstorePassword=android\nkeyAlias=androiddebugkey\nkeyPassword=android\n" "$GITHUB_WORKSPACE/portal.keystore" > ./flutter/android/key.properties
+          # Google Play requires the SAME key forever once published - this is the
+          # permanent production key (generated 2026-10-23), not the earlier
+          # "androiddebugkey"/"android" placeholder.
+          echo "$PORTAL_RELEASE_KEYSTORE_B64" | base64 -d > "$GITHUB_WORKSPACE/portal.keystore"
+          printf "storeFile=%s\nstorePassword=%s\nkeyAlias=portaldesk\nkeyPassword=%s\n" "$GITHUB_WORKSPACE/portal.keystore" "$PORTAL_RELEASE_KEYSTORE_PW" "$PORTAL_RELEASE_KEYSTORE_PW" > ./flutter/android/key.properties
           case ${{ matrix.job.target }} in
             aarch64-linux-android)
               mkdir -p ./flutter/android/app/src/main/jniLibs/arm64-v8a

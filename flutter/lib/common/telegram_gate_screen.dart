@@ -19,27 +19,41 @@ class TelegramGateScreen extends StatefulWidget {
 
 class _TelegramGateScreenState extends State<TelegramGateScreen> {
   bool _linked = telegramGateLinked;
-  late final String _code = genTelegramLinkCode();
-  Timer? _timer;
+  String _code = genTelegramLinkCode();
+  Timer? _pollTimer;
+  Timer? _rotateTimer;
 
   @override
   void initState() {
     super.initState();
     if (!_linked) {
-      _timer = Timer.periodic(const Duration(seconds: 3), (_) => _poll());
+      _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _poll());
+      // A code only matching the single poll-cycle it was shown in would
+      // expire before most people can switch apps and reply; a fixed
+      // 1-minute window is long enough to act on, short enough that an old
+      // screenshot of the code stops working on its own.
+      _rotateTimer =
+          Timer.periodic(const Duration(seconds: 60), (_) => _rotateCode());
     }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _pollTimer?.cancel();
+    _rotateTimer?.cancel();
     super.dispose();
+  }
+
+  void _rotateCode() {
+    if (!mounted || _linked) return;
+    setState(() => _code = genTelegramLinkCode());
   }
 
   Future<void> _poll() async {
     final ok = await pollTelegramLink(_code).catchError((_) => false);
     if (ok && mounted) {
-      _timer?.cancel();
+      _pollTimer?.cancel();
+      _rotateTimer?.cancel();
       setState(() => _linked = true);
     }
   }

@@ -38,7 +38,8 @@ String telegramDeepLink(String code) =>
 /// Polls Telegram once for a `/start <code>` message matching [code]. Does not
 /// advance the update offset (so it never consumes an update another device's
 /// poll still needs — every device just ignores messages whose code doesn't
-/// match its own). Returns true once linked.
+/// match its own). Sends a confirmation reply back to the chat that sent the
+/// matching code, then returns true once linked.
 Future<bool> pollTelegramLink(String code) async {
   if (_kBotToken.isEmpty) return false;
   final url =
@@ -49,10 +50,33 @@ Future<bool> pollTelegramLink(String code) async {
   if (body['ok'] != true) return false;
   final results = body['result'] as List<dynamic>? ?? [];
   final expected = '/start $code';
-  final matched = results.any((u) =>
-      (u['message']?['text'] as String?)?.trim() == expected);
-  if (matched) {
-    await _setLinked();
+  Map<String, dynamic>? matchedMsg;
+  for (final u in results) {
+    final msg = u['message'] as Map<String, dynamic>?;
+    if (msg != null && (msg['text'] as String?)?.trim() == expected) {
+      matchedMsg = msg;
+      break;
+    }
   }
-  return matched;
+  if (matchedMsg == null) return false;
+  await _setLinked();
+  final chatId = matchedMsg['chat']?['id'];
+  if (chatId != null) {
+    await _sendConfirmation(chatId.toString());
+  }
+  return true;
+}
+
+Future<void> _sendConfirmation(String chatId) async {
+  final url =
+      Uri.parse('https://api.telegram.org/bot$_kBotToken/sendMessage');
+  try {
+    await http.post(url, body: {
+      'chat_id': chatId,
+      'text': '✅ Подтверждено. Можно возвращаться в приложение PortalDesk.',
+    }).timeout(const Duration(seconds: 10));
+  } catch (_) {
+    // Best-effort: the gate already unlocked locally regardless of whether
+    // this reply succeeds.
+  }
 }

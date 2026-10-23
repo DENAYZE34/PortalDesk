@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../common.dart';
+import '../../common/telegram_gate.dart';
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/login.dart';
 import '../../consts.dart';
@@ -1144,6 +1145,24 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             title: Text(translate("Enhancements")),
             tiles: enhancementsTiles,
           ),
+        SettingsSection(
+          title: const Text('Аккаунт'),
+          tiles: [
+            SettingsTile(
+              title: const Text('Отвязать Telegram'),
+              description: const Text(
+                  'При следующем запуске придётся подтвердить аккаунт заново'),
+              onPressed: (context) {
+                CommonConfirmDialog(gFFI.dialogManager,
+                    'Отвязать Telegram? Приложение перестанет работать до повторного подтверждения.',
+                    () async {
+                  await telegramGateUnlink();
+                  showToast('Telegram отвязан. Перезапустите приложение.');
+                });
+              },
+            ),
+          ],
+        ),
         SettingsSection(
           title: Text(translate("About")),
           tiles: [

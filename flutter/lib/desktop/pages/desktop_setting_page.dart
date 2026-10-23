@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/common/telegram_gate.dart';
 import 'package:flutter_hbb/common/widgets/audio_input.dart';
 import 'package:flutter_hbb/common/widgets/setting_widgets.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -1075,6 +1076,7 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
                 _Card(title: '2FA', children: [tfa()]),
                 if (!isChangeIdDisabled())
                   _Card(title: 'ID', children: [changeId()]),
+                _Card(title: 'Аккаунт', children: [unlinkTelegram()]),
                 more(context),
               ]),
             ),
@@ -1199,6 +1201,26 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
     }
 
     return tmpWrapper();
+  }
+
+  Widget unlinkTelegram() {
+    return _Button('Отвязать Telegram', () {
+      gFFI.dialogManager.show((setState, close, context) {
+        return CustomAlertDialog(
+          title: const Text('Отвязать Telegram?'),
+          content: const Text(
+              'Приложение перестанет работать до повторного подтверждения.'),
+          actions: [
+            dialogButton('Отмена', onPressed: close, isOutline: true),
+            dialogButton('Отвязать', onPressed: () async {
+              await telegramGateUnlink();
+              close();
+              showToast('Telegram отвязан. Перезапустите приложение.');
+            }),
+          ],
+        );
+      });
+    }, enabled: !locked);
   }
 
   Widget changeId() {

@@ -502,7 +502,12 @@ const TEST_DELAY_TIMEOUT: Duration = Duration::from_secs(1);
 const SEC30: Duration = Duration::from_secs(30);
 const H1: Duration = Duration::from_secs(3600);
 const MILLI1: Duration = Duration::from_millis(1);
-const SEND_TIMEOUT_VIDEO: u64 = 12_000;
+// Stock RustDesk kills the whole session the instant one video write blocks
+// this long. 12s was too tight: a brief real-world stall (WiFi power-save,
+// a congested hop) now has more runway to clear, and the faster video_qos
+// recovery (see video_qos.rs) gets a real chance to bring fps/bitrate down
+// before the hard disconnect fires, instead of racing it.
+const SEND_TIMEOUT_VIDEO: u64 = 25_000;
 const SEND_TIMEOUT_OTHER: u64 = SEND_TIMEOUT_VIDEO * 10;
 const SESSION_TIMEOUT: Duration = Duration::from_secs(30);
 

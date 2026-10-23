@@ -35,11 +35,24 @@ String genTelegramLinkCode() {
 String telegramDeepLink(String code) =>
     'https://t.me/$_kBotUsername?start=$code';
 
-/// Polls Telegram once for a `/start <code>` message matching [code]. Does not
-/// advance the update offset (so it never consumes an update another device's
-/// poll still needs — every device just ignores messages whose code doesn't
-/// match its own). Sends a confirmation reply back to the chat that sent the
-/// matching code, then returns true once linked.
+// Telegram's own "Start" button (when the chat was opened without our
+// ?start=<code> deep link, or on an older client that strips the payload)
+// sends a bare "/start" with no code. Without this, the owner taps Start
+// and nothing visibly happens — remembered across polls so the same bare
+// /start isn't replied to every 3s tick (we never advance the Telegram
+// update offset, so the same update keeps coming back until something
+// else acks it).
+final Set<String> _repliedToBareStart = {};
+
+/// Polls Telegram once for a message in the gate's chat. Does not advance
+/// the update offset (so it never consumes an update another device's poll
+/// still needs — every device just ignores messages whose code doesn't
+/// match its own). Three outcomes:
+/// - `/start <code>` matching [code]: links, sends a confirmation, returns
+///   true.
+/// - bare `/start` (Telegram's own button with no deep-link payload):
+///   replies once with the current code as copyable text, keeps waiting.
+/// - anything else: ignored.
 Future<bool> pollTelegramLink(String code) async {
   if (_kBotToken.isEmpty) return false;
   final url =
@@ -50,33 +63,41 @@ Future<bool> pollTelegramLink(String code) async {
   if (body['ok'] != true) return false;
   final results = body['result'] as List<dynamic>? ?? [];
   final expected = '/start $code';
-  Map<String, dynamic>? matchedMsg;
+
   for (final u in results) {
     final msg = u['message'] as Map<String, dynamic>?;
-    if (msg != null && (msg['text'] as String?)?.trim() == expected) {
-      matchedMsg = msg;
-      break;
+    final text = (msg?['text'] as String?)?.trim();
+    final chatId = msg?['chat']?['id'];
+    if (msg == null || text == null || chatId == null) continue;
+
+    if (text == expected || text == code) {
+      await _setLinked();
+      await _sendMessage(chatId.toString(),
+          '✅ Подтверждено. Можно возвращаться в приложение PortalDesk.');
+      return true;
+    }
+
+    if (text == '/start') {
+      final updateId = u['update_id']?.toString();
+      if (updateId != null && _repliedToBareStart.add(updateId)) {
+        await _sendMessage(
+            chatId.toString(),
+            '🔒 Код входа в PortalDesk\n\n$code\n\n'
+            'Нажмите на цифры, чтобы скопировать, и отправьте их '
+            'отдельным сообщением сюда же. Код действует 1 минуту.');
+      }
     }
   }
-  if (matchedMsg == null) return false;
-  await _setLinked();
-  final chatId = matchedMsg['chat']?['id'];
-  if (chatId != null) {
-    await _sendConfirmation(chatId.toString());
-  }
-  return true;
+  return false;
 }
 
-Future<void> _sendConfirmation(String chatId) async {
+Future<void> _sendMessage(String chatId, String text) async {
   final url =
       Uri.parse('https://api.telegram.org/bot$_kBotToken/sendMessage');
   try {
-    await http.post(url, body: {
-      'chat_id': chatId,
-      'text': '✅ Подтверждено. Можно возвращаться в приложение PortalDesk.',
-    }).timeout(const Duration(seconds: 10));
+    await http.post(url, body: {'chat_id': chatId, 'text': text}).timeout(
+        const Duration(seconds: 10));
   } catch (_) {
-    // Best-effort: the gate already unlocked locally regardless of whether
-    // this reply succeeds.
+    // Best-effort: a failed reply never blocks the gate itself.
   }
 }

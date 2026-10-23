@@ -2814,7 +2814,12 @@ pub fn is_disable_ab() -> bool {
 
 #[inline]
 pub fn is_disable_account() -> bool {
-    is_some_hard_opton("disable-account")
+    // PortalDesk: the Telegram verification gate (see flutter's telegram_gate.dart)
+    // is the only account/identity concept this app has. The stock cloud
+    // username+password login (address-book sync) is unrelated and would
+    // contradict "sign in via Telegram only" - always disabled here, not
+    // conditional on a hard-setting that this fork never populates anyway.
+    true
 }
 
 #[inline]

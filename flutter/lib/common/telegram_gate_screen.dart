@@ -19,42 +19,50 @@ class TelegramGateScreen extends StatefulWidget {
 
 class _TelegramGateScreenState extends State<TelegramGateScreen> {
   bool _linked = telegramGateLinked;
-  String _code = genTelegramLinkCode();
+  bool _opening = false;
+  final String _token = genTelegramLinkToken();
   Timer? _pollTimer;
-  Timer? _rotateTimer;
 
   @override
   void initState() {
     super.initState();
     if (!_linked) {
       _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _poll());
-      // A code only matching the single poll-cycle it was shown in would
-      // expire before most people can switch apps and reply; a fixed
-      // 1-minute window is long enough to act on, short enough that an old
-      // screenshot of the code stops working on its own.
-      _rotateTimer =
-          Timer.periodic(const Duration(seconds: 60), (_) => _rotateCode());
     }
   }
 
   @override
   void dispose() {
     _pollTimer?.cancel();
-    _rotateTimer?.cancel();
     super.dispose();
   }
 
-  void _rotateCode() {
-    if (!mounted || _linked) return;
-    setState(() => _code = genTelegramLinkCode());
-  }
-
   Future<void> _poll() async {
-    final ok = await pollTelegramLink(_code).catchError((_) => false);
+    final ok = await pollTelegramLink(_token).catchError((_) => false);
     if (ok && mounted) {
       _pollTimer?.cancel();
-      _rotateTimer?.cancel();
       setState(() => _linked = true);
+    }
+  }
+
+  Future<void> _openTelegram() async {
+    if (_opening) return;
+    setState(() => _opening = true);
+    try {
+      final appLink = Uri.parse(telegramAppDeepLink(_token));
+      var opened = await launchUrl(appLink,
+          mode: LaunchMode.externalApplication);
+      if (!opened) {
+        final webLink = Uri.parse(telegramWebDeepLink(_token));
+        opened =
+            await launchUrl(webLink, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {
+      final webLink = Uri.parse(telegramWebDeepLink(_token));
+      await launchUrl(webLink, mode: LaunchMode.externalApplication)
+          .catchError((_) => false);
+    } finally {
+      if (mounted) setState(() => _opening = false);
     }
   }
 
@@ -92,6 +100,7 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                       style: TextStyle(color: muted, fontSize: 14, height: 1.4)),
                   const SizedBox(height: 32),
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 22, vertical: 28),
                     decoration: BoxDecoration(
@@ -100,21 +109,17 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                       border: Border.all(color: border),
                     ),
                     child: Column(children: [
-                      _step('1',
-                          'Откройте Telegram и начните чат с ботом @PortalDeskVerify_bot'),
-                      const SizedBox(height: 14),
-                      _step('2', 'Отправьте боту этот код:'),
-                      const SizedBox(height: 18),
-                      SelectableText(
-                        '${_code.substring(0, 3)} ${_code.substring(3)}',
-                        style: const TextStyle(
-                            color: fg,
-                            fontSize: 40,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 4,
-                            fontFeatures: [FontFeature.tabularFigures()]),
+                      Container(
+                        width: 56,
+                        height: 56,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF229ED9)),
+                        child: const Icon(Icons.send_rounded,
+                            color: Colors.white, size: 26),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 18),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
@@ -125,14 +130,20 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          onPressed: () => launchUrl(
-                              Uri.parse(telegramDeepLink(_code)),
-                              mode: LaunchMode.externalApplication),
-                          child: const Text('Открыть Telegram',
-                              style: TextStyle(
+                          onPressed: _opening ? null : _openTelegram,
+                          child: Text(
+                              _opening ? 'Открываем…' : 'Войти через Telegram',
+                              style: const TextStyle(
                                   fontWeight: FontWeight.w700, fontSize: 15)),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      const Text(
+                          'Откроется Telegram — нажмите «Запустить», и вход '
+                          'в приложение произойдёт сам.',
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(color: muted, fontSize: 12.5, height: 1.4)),
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -156,30 +167,6 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _step(String n, String text) {
-    const fg = Color(0xFFF2F2F2);
-    const bg = Color(0xFF050507);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: fg),
-          child: Text(n,
-              style: const TextStyle(
-                  color: bg, fontSize: 12, fontWeight: FontWeight.w800)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-            child: Text(text,
-                textAlign: TextAlign.left,
-                style: const TextStyle(color: fg, fontSize: 14, height: 1.5))),
-      ],
     );
   }
 }

@@ -27,33 +27,44 @@ Future<void> telegramGateUnlink() async {
   await bind.mainSetLocalOption(key: _kLocalOptionKey, value: '');
 }
 
-String genTelegramLinkCode() {
-  final code = 100000 + Random.secure().nextInt(900000);
-  return code.toString();
+/// A per-session secret token, never shown to the user. It rides as the
+/// `start` payload of the deep link so the one tap that opens Telegram and
+/// the one tap on Telegram's own "START" button are the entire login flow —
+/// there is nothing to type or copy.
+String genTelegramLinkToken() {
+  final rand = Random.secure();
+  return List.generate(24, (_) => rand.nextInt(16).toRadixString(16)).join();
 }
 
-String telegramDeepLink(String code) =>
-    'https://t.me/$_kBotUsername?start=$code';
+/// `tg://` resolves straight to the Telegram app and, unlike `https://t.me`,
+/// isn't a web link another installed app can register itself as a handler
+/// for (observed in testing: a third-party app intercepted the `t.me` link
+/// before Telegram did). Tried first; [telegramWebDeepLink] is the fallback
+/// for platforms without a registered `tg://` handler (e.g. some desktops).
+String telegramAppDeepLink(String token) =>
+    'tg://resolve?domain=$_kBotUsername&start=$token';
 
-// Telegram's own "Start" button (when the chat was opened without our
-// ?start=<code> deep link, or on an older client that strips the payload)
-// sends a bare "/start" with no code. Without this, the owner taps Start
-// and nothing visibly happens — remembered across polls so the same bare
+String telegramWebDeepLink(String token) =>
+    'https://t.me/$_kBotUsername?start=$token';
+
+// Telegram's own "Start" button only appears when the chat was opened via
+// our ?start=<token> deep link, so a bare "/start" here means the user
+// opened the bot chat some other way (search, old history). There is no
+// token to correlate it to a waiting app, so it can't auto-link — just
+// point them back to the app. Remembered across polls so the same bare
 // /start isn't replied to every 3s tick (we never advance the Telegram
-// update offset, so the same update keeps coming back until something
-// else acks it).
+// update offset, so the same update keeps coming back until something else
+// acks it).
 final Set<String> _repliedToBareStart = {};
 
 /// Polls Telegram once for a message in the gate's chat. Does not advance
 /// the update offset (so it never consumes an update another device's poll
-/// still needs — every device just ignores messages whose code doesn't
-/// match its own). Three outcomes:
-/// - `/start <code>` matching [code]: links, sends a confirmation, returns
+/// still needs — every device just ignores messages whose token doesn't
+/// match its own). Two outcomes:
+/// - `/start <token>` matching [token]: links, sends a confirmation, returns
 ///   true.
-/// - bare `/start` (Telegram's own button with no deep-link payload):
-///   replies once with the current code as copyable text, keeps waiting.
-/// - anything else: ignored.
-Future<bool> pollTelegramLink(String code) async {
+/// - bare `/start`: replies once pointing back to the app, keeps waiting.
+Future<bool> pollTelegramLink(String token) async {
   if (_kBotToken.isEmpty) return false;
   final url =
       Uri.parse('https://api.telegram.org/bot$_kBotToken/getUpdates');
@@ -62,7 +73,7 @@ Future<bool> pollTelegramLink(String code) async {
   final body = jsonDecode(resp.body) as Map<String, dynamic>;
   if (body['ok'] != true) return false;
   final results = body['result'] as List<dynamic>? ?? [];
-  final expected = '/start $code';
+  final expected = '/start $token';
 
   for (final u in results) {
     final msg = u['message'] as Map<String, dynamic>?;
@@ -70,7 +81,7 @@ Future<bool> pollTelegramLink(String code) async {
     final chatId = msg?['chat']?['id'];
     if (msg == null || text == null || chatId == null) continue;
 
-    if (text == expected || text == code) {
+    if (text == expected) {
       await _setLinked();
       await _sendMessage(chatId.toString(),
           '✅ Подтверждено. Можно возвращаться в приложение PortalDesk.');
@@ -82,9 +93,9 @@ Future<bool> pollTelegramLink(String code) async {
       if (updateId != null && _repliedToBareStart.add(updateId)) {
         await _sendMessage(
             chatId.toString(),
-            '🔒 Код входа в PortalDesk\n\n$code\n\n'
-            'Нажмите на цифры, чтобы скопировать, и отправьте их '
-            'отдельным сообщением сюда же. Код действует 1 минуту.');
+            '🔒 Это вход в PortalDesk.\n\n'
+            'Откройте приложение PortalDesk на устройстве и нажмите '
+            '«Войти через Telegram» — подтверждение пройдёт автоматически.');
       }
     }
   }

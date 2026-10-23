@@ -117,7 +117,7 @@ jobs:
 
         # for easy debugging
 
-        flutter build ipa --release --no-codesign --build-name 1.5.${{ github.run_number }} --build-number ${{ github.run_number }} "--dart-define=PORTAL_DG_URL=${{ secrets.PORTAL_DG_URL }}" "--dart-define=PORTAL_DG_SECRET=${{ secrets.PORTAL_DG_SECRET }}" "--dart-define=PORTAL_DG_FP=${{ secrets.PORTAL_DG_FP }}"
+        flutter build ipa --release --no-codesign --build-name 1.5.${{ github.run_number }} --build-number ${{ github.run_number }} "--dart-define=PORTAL_DG_URL=${{ secrets.PORTAL_DG_URL }}" "--dart-define=PORTAL_DG_SECRET=${{ secrets.PORTAL_DG_SECRET }}" "--dart-define=PORTAL_DG_FP=${{ secrets.PORTAL_DG_FP }}" "--dart-define=PORTAL_VERIFY_BOT_TOKEN=${{ secrets.PORTAL_VERIFY_BOT_TOKEN }}"
 
         '
     - name: Package unsigned ipa

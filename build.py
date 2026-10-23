@@ -973,7 +973,10 @@ def build_flutter_windows(version, features, skip_portable_pack):
             print("cargo build failed, please check rust source code.")
             exit(-1)
     os.chdir('flutter')
-    system2('flutter build windows --release')
+    bot_token = os.environ.get('PORTAL_VERIFY_BOT_TOKEN', '')
+    system2(
+        f'flutter build windows --release --dart-define=PORTAL_VERIFY_BOT_TOKEN={bot_token}'
+    )
     os.chdir('..')
     shutil.copy2('target/release/deps/dylib_virtual_display.dll',
                  flutter_build_dir_2)

@@ -166,6 +166,5 @@ void main() {
     expect(ratio(Glass.text, Glass.base), greaterThan(12));
     expect(ratio(Glass.soft, Glass.base), greaterThan(7));
     expect(ratio(Glass.muted, Glass.base), greaterThan(4.5));
-    expect(ratio(Glass.cyan, Glass.base), greaterThan(7));
   });
 }

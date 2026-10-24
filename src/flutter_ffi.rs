@@ -2729,25 +2729,14 @@ pub fn main_get_common(key: String) -> String {
             }
         } else if key.starts_with("download-file-") {
             let _version = key.replace("download-file-", "");
+            // Portal only ever publishes the portable-packer self-extracting
+            // installer (see .github/workflows/portal-windows.yml), never an
+            // MSI, so unlike upstream RustDesk there is no msi/exe branch to
+            // pick between here - just the one asset name pattern CI uses.
             #[cfg(target_os = "windows")]
-            return match (
-                crate::platform::windows::is_msi_installed(),
-                crate::common::is_custom_client(),
-            ) {
-                (Ok(true), false) => match crate::platform::windows::release_arch_suffix() {
-                    Some(arch) => format!("rustdesk-{_version}-{arch}.msi"),
-                    None => "error:unsupported".to_owned(),
-                },
-                (Ok(true), true) | (Ok(false), _) => {
-                    match crate::platform::windows::release_arch_suffix() {
-                        Some(arch) => format!("rustdesk-{_version}-{arch}.exe"),
-                        None => "error:unsupported".to_owned(),
-                    }
-                }
-                (Err(e), _) => {
-                    log::error!("Failed to check if is msi: {}", e);
-                    format!("error:update-failed-check-msi-tip")
-                }
+            return match crate::platform::windows::release_arch_suffix() {
+                Some(arch) => format!("PortalDesk-setup-{_version}-{arch}.exe"),
+                None => "error:unsupported".to_owned(),
             };
             #[cfg(target_os = "macos")]
             {

@@ -510,6 +510,12 @@ class RustDeskMultiWindowManager {
     return _activeWindows;
   }
 
+  /// Window IDs of currently open remote-desktop sub-windows, read-only.
+  /// Used by the main window's connected-devices panel to know which
+  /// windows to poll for their session lists.
+  List<int> get remoteDesktopWindows =>
+      List.unmodifiable(_remoteDesktopWindows);
+
   Future<void> _notifyActiveWindow() async {
     for (final callback in _windowActiveCallbacks) {
       await callback.call();

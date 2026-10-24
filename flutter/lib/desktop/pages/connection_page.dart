@@ -23,6 +23,7 @@ import '../../common/widgets/peer_tab_page.dart';
 import '../../common/widgets/autocomplete.dart';
 import '../../models/platform_model.dart';
 import '../../desktop/widgets/material_mod_popup_menu.dart' as mod_menu;
+import '../../desktop/widgets/connected_devices_panel.dart';
 
 class OnlineStatusWidget extends StatefulWidget {
   const OnlineStatusWidget({Key? key, this.onSvcStatusChanged})
@@ -331,6 +332,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                   ),
                 ).paddingOnly(top: 8, left: 12),
               Expanded(child: PeerTabPage().paddingOnly(left: 4, top: 8)),
+              const ConnectedDevicesPanel(),
             ],
           )),
           if (!isOutgoingOnly) const Divider(height: 1),

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,7 @@ import '../../common.dart';
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/toolbar.dart';
 import '../../models/model.dart';
+import '../../models/file_model.dart';
 import '../../models/input_model.dart';
 import '../../models/platform_model.dart';
 import '../../common/shared_state.dart';
@@ -107,6 +110,7 @@ class _RemotePageState extends State<RemotePage>
   bool _macOSExplicitFocusRequestPending = false;
   StreamSubscription<DesktopTabState>? _tabStateSubscription;
   final _cursorOverImage = false.obs;
+  final _dropHover = false.obs;
   late RxBool _showRemoteCursor;
   late RxBool _zoomCursor;
   late RxBool _remoteCursorMoved;
@@ -743,7 +747,7 @@ class _RemotePageState extends State<RemotePage>
                     }
                   },
                   inputModel: _ffi.inputModel,
-                  child: getBodyForDesktop(context))),
+                  child: _dropToSendFiles(getBodyForDesktop(context)))),
           Stack(
             children: [
               _ffi.ffiModel.pi.isSet.isTrue &&
@@ -939,6 +943,50 @@ class _RemotePageState extends State<RemotePage>
       },
       inputModel: _ffi.inputModel,
       child: child,
+    );
+  }
+
+  /// Wraps the live video view so dropping a local file onto it sends that
+  /// file to the remote machine's current file-transfer directory, without
+  /// needing the File Transfer tab open. Mirrors the send direction
+  /// `FileModel.sendFiles` is written for (controller.isLocal -> other
+  /// side); `remoteController`'s directory is already populated as soon as
+  /// the connection is established (see `FileModel.receiveFileDir`), so no
+  /// extra fallback is needed here.
+  Widget _dropToSendFiles(Widget child) {
+    return DropTarget(
+      onDragDone: (detail) {
+        final items = SelectedItems(isLocal: true);
+        for (final file in detail.files) {
+          final f = File(file.path);
+          items.add(Entry()
+            ..path = file.path
+            ..name = file.name
+            ..size = FileSystemEntity.isDirectorySync(f.path)
+                ? 0
+                : f.lengthSync());
+        }
+        final otherSideData = _ffi.fileModel.remoteController.directoryData();
+        _ffi.fileModel.localController.sendFiles(items, otherSideData);
+      },
+      onDragEntered: (_) => _dropHover.value = true,
+      onDragExited: (_) => _dropHover.value = false,
+      child: Stack(
+        children: [
+          child,
+          Obx(() => _dropHover.isFalse
+              ? const SizedBox.shrink()
+              : IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.6), width: 3),
+                      color: Colors.black.withOpacity(0.15),
+                    ),
+                  ),
+                )),
+        ],
+      ),
     );
   }
 

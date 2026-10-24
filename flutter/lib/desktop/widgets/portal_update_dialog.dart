@@ -4,6 +4,10 @@
 // existing handleUpdate() downloader in update_progress.dart). This file
 // only adds the attention-grabbing presentation; it does not change how
 // updates are detected or installed.
+//
+// Styled to match the app's actual chrome (flat dark cards, solid white
+// pill buttons - see connection_page.dart's "Подключиться" button), not
+// the separate Neon gradient palette.
 import 'dart:convert';
 import 'dart:ui';
 
@@ -11,13 +15,18 @@ import 'package:flutter/material.dart' hide Dialog;
 import 'package:flutter/material.dart' as material show Dialog;
 import 'package:http/http.dart' as http;
 
-import '../../mobile/neon_theme.dart';
 import '../../mobile/update_logic.dart';
 import '../../models/platform_model.dart';
 import 'update_progress.dart';
 
 const String _kReleaseApi =
     'https://api.github.com/repos/DENAYZE34/PortalDesk/releases/latest';
+
+const _bg = Color(0xFF121214);
+const _fg = Color(0xFFF2F2F2);
+const _muted = Color(0xFF9A9A9A);
+const _border = Color(0x1AFFFFFF);
+const _ok = Color(0xFF34D399);
 
 /// Shows the modal once for [updateUrl]'s version, fetching "what's new"
 /// notes from the same GitHub release the Rust side already found. Safe to
@@ -66,37 +75,44 @@ class _PortalUpdateDialog extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: NeonPanel(
-              glow: true,
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Container(
               padding: const EdgeInsets.fromLTRB(26, 26, 26, 20),
+              decoration: BoxDecoration(
+                color: _bg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _border),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                        shape: BoxShape.circle, gradient: Neon.gradient),
-                    child: const Icon(Icons.arrow_upward_rounded,
-                        color: Colors.white, size: 22),
+                  Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle, color: _ok),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text('Доступно обновление',
+                            style: TextStyle(
+                                color: _fg,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Доступно обновление',
-                      style: TextStyle(
-                          color: Neon.text,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
                   Text('PortalDesk $version',
-                      style: const TextStyle(color: Neon.muted, fontSize: 13)),
+                      style: const TextStyle(color: _muted, fontSize: 13)),
                   if (notes.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     const Text('Что нового',
                         style: TextStyle(
-                            color: Neon.text,
+                            color: _fg,
                             fontSize: 13,
                             fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
@@ -110,7 +126,7 @@ class _PortalUpdateDialog extends StatelessWidget {
                               padding: EdgeInsets.only(top: 6),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle, color: Neon.cyan),
+                                    shape: BoxShape.circle, color: _muted),
                                 child: SizedBox(width: 5, height: 5),
                               ),
                             ),
@@ -118,7 +134,7 @@ class _PortalUpdateDialog extends StatelessWidget {
                             Expanded(
                                 child: Text(n,
                                     style: const TextStyle(
-                                        color: Neon.muted,
+                                        color: _muted,
                                         fontSize: 13,
                                         height: 1.4))),
                           ],
@@ -139,36 +155,26 @@ class _PortalUpdateDialog extends StatelessWidget {
                             Navigator.of(context).pop();
                           },
                           child: const Text('Позже',
-                              style: TextStyle(color: Neon.muted)),
+                              style: TextStyle(color: _muted)),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: Neon.gradient,
-                            borderRadius: BorderRadius.circular(12),
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: _fg,
+                            foregroundColor: _bg,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                handleUpdate(updateUrl);
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Center(
-                                  child: Text('Обновить',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14)),
-                                ),
-                              ),
-                            ),
-                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            handleUpdate(updateUrl);
+                          },
+                          child: const Text('Обновить',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 14)),
                         ),
                       ),
                     ],

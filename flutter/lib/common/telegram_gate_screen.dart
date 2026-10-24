@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'telegram_gate.dart';
@@ -20,27 +21,41 @@ class TelegramGateScreen extends StatefulWidget {
 class _TelegramGateScreenState extends State<TelegramGateScreen> {
   bool _linked = telegramGateLinked;
   bool _opening = false;
-  final String _token = genTelegramLinkToken();
+  String _token = genTelegramLinkToken();
   Timer? _pollTimer;
+  Timer? _rotateTimer;
 
   @override
   void initState() {
     super.initState();
     if (!_linked) {
       _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _poll());
+      // Each token is single-use (consumed the instant it links), but
+      // rotating it even while unused keeps a QR code photographed off the
+      // screen, or a deep link left open in Telegram, from staying valid
+      // indefinitely.
+      _rotateTimer =
+          Timer.periodic(const Duration(seconds: 60), (_) => _rotate());
     }
   }
 
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _rotateTimer?.cancel();
     super.dispose();
+  }
+
+  void _rotate() {
+    if (!mounted || _linked) return;
+    setState(() => _token = genTelegramLinkToken());
   }
 
   Future<void> _poll() async {
     final ok = await pollTelegramLink(_token).catchError((_) => false);
     if (ok && mounted) {
       _pollTimer?.cancel();
+      _rotateTimer?.cancel();
       setState(() => _linked = true);
     }
   }
@@ -141,6 +156,40 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                       const Text(
                           'Откроется Telegram — нажмите «Запустить», и вход '
                           'в приложение произойдёт сам.',
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(color: muted, fontSize: 12.5, height: 1.4)),
+                      const SizedBox(height: 22),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: border)),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text('или отсканируйте',
+                                style:
+                                    TextStyle(color: muted, fontSize: 12)),
+                          ),
+                          Expanded(child: Divider(color: border)),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: QrImageView(
+                          data: telegramWebDeepLink(_token),
+                          version: QrVersions.auto,
+                          size: 148,
+                          gapless: false,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                          'Наведите камеру телефона на код — он действует 60 секунд.',
                           textAlign: TextAlign.center,
                           style:
                               TextStyle(color: muted, fontSize: 12.5, height: 1.4)),

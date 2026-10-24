@@ -16,6 +16,7 @@ import 'package:flutter_hbb/desktop/glass/portal_ui.dart';
 import 'package:flutter_hbb/mobile/glass/glass.dart';
 import 'package:flutter_hbb/mobile/neon_theme.dart';
 import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
+import 'package:flutter_hbb/desktop/widgets/portal_update_dialog.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/models/server_model.dart';
 import 'package:flutter_hbb/models/state_model.dart';
@@ -1047,6 +1048,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.initState();
     bind.mainGetVersion().then((v) {
       if (mounted) setState(() => _installedVersion = v);
+    });
+    ever<String>(stateGlobal.updateUrl, (url) {
+      if (url.isEmpty || !mounted) return;
+      final version = url.split('/').last;
+      final closedFor = bind.mainGetLocalOption(key: 'portal-update-closed');
+      if (closedFor == version) return;
+      showPortalUpdateDialog(context, url);
     });
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {
       await gFFI.serverModel.fetchID();

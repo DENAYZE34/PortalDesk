@@ -457,7 +457,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       ]);
     }
     return Container(
-      margin: const EdgeInsets.fromLTRB(14, 4, 14, 4),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: GlassCard(
         radius: P.rTile,
         strength: 1.1,

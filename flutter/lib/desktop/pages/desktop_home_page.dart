@@ -298,7 +298,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             style: TextStyle(
                                 color: Glass.text,
                                 fontSize: 17,
-                                fontWeight: FontWeight.w800)),
+                                fontWeight: FontWeight.w500)),
                         const SizedBox(height: 2),
                         Row(children: [
                           StatusDot(
@@ -320,7 +320,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               Row(children: [
                 const Text('ID',
                     style: TextStyle(
-                        color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                        color: Glass.muted, fontSize: 12)),
                 const Spacer(),
                 _glassIconButton(Icons.content_copy_rounded, translate('Copy'), () {
                   Clipboard.setData(ClipboardData(text: model.serverId.text));
@@ -349,9 +349,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               Divider(color: Colors.white.withOpacity(0.08), height: 1),
               const SizedBox(height: 10),
               Row(children: [
-                Text(translate('One-time Password').toUpperCase(),
+                Text(translate('One-time Password'),
                     style: const TextStyle(
-                        color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                        color: Glass.muted, fontSize: 12)),
                 const Spacer(),
                 if (showOneTime)
                   _glassIconButton(Icons.refresh_rounded,
@@ -384,7 +384,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                         style: const TextStyle(
                             color: Glass.text,
                             fontSize: 20,
-                            fontWeight: FontWeight.w700),
+                            fontWeight: FontWeight.w500),
                       ).workaroundFreezeLinuxMint()
                     : const Padding(
                         padding: EdgeInsets.only(top: 4),
@@ -413,7 +413,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   style: const TextStyle(
                       color: Glass.text,
                       fontSize: 13,
-                      fontWeight: FontWeight.w800))),
+                      fontWeight: FontWeight.w500))),
           if (closeButton)
             PortalIconButton(
                 icon: Icons.close_rounded, tip: translate('Close'), onTap: onClose, size: 24),
@@ -477,7 +477,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             style: const TextStyle(
                 color: Glass.text,
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w500,
                 letterSpacing: -0.4)),
         const SizedBox(height: 4),
         Text(translate(isOutgoingOnly ? 'outgoing_only_desk_tip' : 'desk_tip'),
@@ -498,7 +498,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         Row(children: [
           const Text('ID',
               style: TextStyle(
-                  color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                  color: Glass.muted, fontSize: 12)),
           const Spacer(),
           _glassIconButton(Icons.content_copy_rounded, translate('Copy'), () {
             Clipboard.setData(ClipboardData(text: model.serverId.text));
@@ -537,11 +537,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       radius: P.rTile,
       liquid: true,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(translate('One-time Password').toUpperCase(),
+        Text(translate('One-time Password'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                color: Glass.muted, fontSize: 11, letterSpacing: 1.6)),
+                color: Glass.muted, fontSize: 12)),
         Row(children: [
           Expanded(
             child: GestureDetector(
@@ -565,7 +565,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 style: const TextStyle(
                     color: Glass.text,
                     fontSize: 19,
-                    fontWeight: FontWeight.w700),
+                    fontWeight: FontWeight.w500),
               ).workaroundFreezeLinuxMint(),
             ),
           ),
@@ -955,14 +955,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               0, marginTop, 0, bind.isIncomingOnly() ? marginTop : 0),
           child: Container(
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromARGB(255, 226, 66, 188),
-                  Color.fromARGB(255, 244, 114, 124),
-                ],
-              )),
+                  color: Glass.surface,),
               padding: EdgeInsets.all(20),
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -974,7 +967,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                 translate(title),
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                     fontSize: 15),
                               ).marginOnly(bottom: 6)),
                             ]

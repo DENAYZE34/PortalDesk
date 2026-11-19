@@ -8,73 +8,61 @@ import '../../mobile/glass/glass.dart';
 
 /// PortalDesk desktop design system.
 ///
-/// One 8 px grid, one type scale, one radius set, one control height. Every page
-/// is built from these pieces so spacing and proportions never drift.
+/// One 4 px grid, one type scale, one radius set, one control height. Every
+/// page is built from these pieces so spacing and proportions never drift.
+/// Surfaces are flat graphite with hairline borders; there is no glow, blur or
+/// gradient anywhere in this file.
 
 /// Layout and type tokens.
 class P {
-  // spacing: multiples of 8 (4 for hairline gaps)
+  // spacing: multiples of 4
   static const double s4 = 4, s8 = 8, s12 = 12, s16 = 16, s20 = 20, s24 = 24, s32 = 32, s48 = 48;
   // page
   static const double pageGutter = 24;
   static const double contentMax = 1120;
   static const double settingsMax = 840;
-  // radii
-  static const double rCtl = 10, rTile = 16, rCard = 24;
+  // radii: control 10, tile 12, card 16
+  static const double rCtl = 10, rTile = 12, rCard = 16;
   static const double rPill = 99;
   // controls
   static const double hCtl = 36, hBtn = 40, hInput = 44, hIcon = 40, hIconSm = 32;
 
-  // type: size / line height / weight
+  // type: size / line height / weight (400 and 500 only)
   static const TextStyle display = TextStyle(
-      color: Glass.text, fontSize: 32, height: 40 / 32, fontWeight: FontWeight.w800, letterSpacing: -0.4);
+      color: Glass.text, fontSize: 32, height: 40 / 32, fontWeight: FontWeight.w500, letterSpacing: -0.4);
   static const TextStyle headline = TextStyle(
-      color: Glass.text, fontSize: 24, height: 32 / 24, fontWeight: FontWeight.w800, letterSpacing: -0.2);
+      color: Glass.text, fontSize: 24, height: 32 / 24, fontWeight: FontWeight.w500, letterSpacing: -0.2);
   static const TextStyle title = TextStyle(
-      color: Glass.text, fontSize: 16, height: 22 / 16, fontWeight: FontWeight.w700);
+      color: Glass.text, fontSize: 16, height: 22 / 16, fontWeight: FontWeight.w500);
   static const TextStyle body = TextStyle(
       color: Glass.text, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w400);
   static const TextStyle bodyStrong = TextStyle(
-      color: Glass.text, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600);
+      color: Glass.text, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w500);
   static const TextStyle caption = TextStyle(
       color: Glass.soft, fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w400);
   static const TextStyle overline = TextStyle(
-      color: Glass.muted, fontSize: 11, height: 16 / 11, fontWeight: FontWeight.w600, letterSpacing: 1.2);
+      color: Glass.muted, fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w500);
 
   /// The ID: tabular figures so digits do not jitter.
   static const TextStyle id = TextStyle(
       color: Glass.text,
       fontSize: 28,
       height: 36 / 28,
-      fontWeight: FontWeight.w800,
-      letterSpacing: 0.6,
+      fontWeight: FontWeight.w500,
       fontFeatures: [FontFeature.tabularFigures()]);
 }
 
-/// The real PortalDesk logo (the neon P app icon).
+/// The PortalDesk logo.
 class PortalLogo extends StatelessWidget {
   final double size;
   const PortalLogo({super.key, this.size = 40});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.26),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.45),
-              blurRadius: size * 0.45,
-              spreadRadius: -size * 0.12),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.26),
-        child: Image.asset('assets/portal_logo.png',
-            width: size, height: size, fit: BoxFit.cover, filterQuality: FilterQuality.high),
-      ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.26),
+      child: Image.asset('assets/portal_logo.png',
+          width: size, height: size, fit: BoxFit.cover, filterQuality: FilterQuality.high),
     );
   }
 }
@@ -95,7 +83,7 @@ class PortalStatus extends StatelessWidget {
   }
 }
 
-/// 40 px round icon button with a tooltip.
+/// Round icon button with a tooltip.
 class PortalIconButton extends StatelessWidget {
   final Object icon;
   final String tip;
@@ -115,50 +103,23 @@ class PortalIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glyph = PortalGlyph(icon,
-        size: size * 0.5, color: primary ? Colors.black : (color ?? Glass.soft));
-    final deco = primary
-        ? BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 14, offset: const Offset(0, 6)),
-            ],
-          )
-        : BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white.withOpacity(0.14), Colors.white.withOpacity(0.03)],
-            ),
-            border: Border.all(color: Glass.edge(0.14)),
-            boxShadow: [
-              BoxShadow(color: Colors.white.withOpacity(0.2), blurRadius: 0, offset: const Offset(0, 1)),
-              BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 10, offset: const Offset(0, 4)),
-            ],
-          );
+        size: size * 0.5, color: primary ? Glass.base : (color ?? Glass.soft));
     return Tooltip(
       message: tip,
       child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
+        color: primary ? Glass.text : Glass.raised,
+        shape: CircleBorder(side: primary ? BorderSide.none : BorderSide(color: Glass.edge())),
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: Container(
-            width: size,
-            height: size,
-            decoration: deco,
-            alignment: Alignment.center,
-            child: glyph,
-          ),
+          child: SizedBox(width: size, height: size, child: Center(child: glyph)),
         ),
       ),
     );
   }
 }
 
-/// A square 3D bevel tile for a glyph (app-icon style), light or dark variant.
+/// A square tile for a glyph, light or dark variant.
 class PortalTile3D extends StatelessWidget {
   final Object icon;
   final double size;
@@ -169,38 +130,21 @@ class PortalTile3D extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradient = dark
-        ? const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF3A3A3E), Color(0xFF0A0A0B)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFCFCFD), Color(0xFFB7B7BD)],
-          );
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        gradient: gradient,
-        boxShadow: [
-          BoxShadow(
-              color: dark ? Colors.black.withOpacity(0.08) : Colors.white.withOpacity(0.9),
-              blurRadius: 0,
-              offset: const Offset(0, 1)),
-          BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 16, offset: const Offset(0, 8)),
-        ],
+        color: dark ? Glass.raised : Glass.text,
+        border: dark ? Border.all(color: Glass.edge()) : null,
       ),
-      child: PortalGlyph(icon, size: size * 0.42, color: dark ? Colors.white.withOpacity(0.92) : Colors.black.withOpacity(0.78)),
+      child: PortalGlyph(icon, size: size * 0.42, color: dark ? Glass.text : Glass.base),
     );
   }
 }
 
-/// A titled glass panel that groups related settings.
+/// A titled panel that groups related settings.
 class PortalSection extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -219,14 +163,12 @@ class PortalSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       radius: P.rCard,
-      strength: 1.1,
-      liquid: true,
       padding: const EdgeInsets.fromLTRB(P.s20, P.s16, P.s20, P.s4),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           if (icon != null) ...[
-            PortalTile3D(icon!, size: 34, radius: P.rCtl, dark: true),
-            const SizedBox(width: P.s16),
+            PortalTile3D(icon!, size: 32, radius: P.rCtl, dark: true),
+            const SizedBox(width: P.s12),
           ],
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -238,7 +180,7 @@ class PortalSection extends StatelessWidget {
         ]),
         const SizedBox(height: P.s16),
         for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) Divider(height: 1, thickness: 1, color: Colors.white.withOpacity(0.07)),
+          if (i > 0) Divider(height: 1, thickness: 1, color: Glass.edge()),
           children[i],
         ],
       ]),
@@ -246,7 +188,7 @@ class PortalSection extends StatelessWidget {
   }
 }
 
-/// One setting row: label (and hint) left, control right. 56 px minimum.
+/// One setting row: label (and hint) left, control right. 48 px minimum.
 class PortalRow extends StatelessWidget {
   final String label;
   final String? hint;
@@ -322,71 +264,30 @@ class PortalSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 160),
+      curve: Cubic(0.22, 1, 0.36, 1),
       width: 44,
       height: 24,
       padding: const EdgeInsets.all(3),
       alignment: value ? Alignment.centerRight : Alignment.centerLeft,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(P.rPill),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: value
-              ? [
-                  Colors.white.withOpacity(enabled ? 1 : 0.45),
-                  Colors.white.withOpacity(enabled ? 0.78 : 0.35),
-                ]
-              : [
-                  Colors.white.withOpacity(enabled ? 0.22 : 0.09),
-                  Colors.white.withOpacity(enabled ? 0.08 : 0.04),
-                ],
-        ),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.45),
-              blurRadius: 6,
-              offset: const Offset(0, -1)),
-          if (value)
-            BoxShadow(
-                color: Colors.white.withOpacity(0.18),
-                blurRadius: 0,
-                offset: const Offset(0, 1)),
-        ],
+        color: value ? Glass.text.withOpacity(enabled ? 1 : 0.4) : Glass.raised,
+        border: value ? null : Border.all(color: Glass.edge(0.14)),
       ),
       child: Container(
         width: 18,
         height: 18,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: value
-                ? [
-                    Colors.black.withOpacity(enabled ? 0.92 : 0.5),
-                    Colors.black.withOpacity(enabled ? 1 : 0.6),
-                  ]
-                : [
-                    Colors.white.withOpacity(enabled ? 1 : 0.6),
-                    Color.lerp(Colors.white, Colors.black, 0.12)!
-                        .withOpacity(enabled ? 1 : 0.6),
-                  ],
-          ),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 4,
-                offset: const Offset(0, 2)),
-          ],
+          color: value ? Glass.base : Glass.soft.withOpacity(enabled ? 1 : 0.5),
         ),
       ),
     );
   }
 }
 
-/// Mutually exclusive options as pills (segmented control).
+/// Mutually exclusive options as a row of chips.
 class PortalChoiceRow<T> extends StatelessWidget {
   final String? label;
   final List<(T, String)> options;
@@ -432,50 +333,27 @@ class _Pill extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
+        duration: const Duration(milliseconds: 140),
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: P.s16),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(P.rPill),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: selected
-                ? [Colors.white, const Color(0xFFDFDFE3)]
-                : [Colors.white.withOpacity(0.12), Colors.white.withOpacity(0.03)],
-          ),
-          border: Border.all(color: selected ? Colors.white : Glass.edge(0.14)),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.45),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6)),
-                ]
-              : [
-                  BoxShadow(
-                      color: Colors.white.withOpacity(0.2),
-                      blurRadius: 0,
-                      offset: const Offset(0, 1)),
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3)),
-                ],
+          borderRadius: BorderRadius.circular(P.rCtl),
+          color: selected ? Glass.text : Colors.transparent,
+          border: Border.all(color: selected ? Glass.text : Glass.edge(0.14)),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(text,
-              style: P.caption.copyWith(
-                  fontSize: 13,
-                  color: selected ? Colors.black : Glass.soft,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500)),
-        ]),
+        child: Text(text,
+            style: P.caption.copyWith(
+                fontSize: 13,
+                color: selected ? Glass.base : Glass.soft,
+                fontWeight: FontWeight.w500)),
       ),
     );
   }
 }
 
-/// Buttons: primary (white pill), secondary (glass pill). Height 40 or 48.
+/// Buttons: primary (off-white), secondary (raised surface with a hairline).
+/// Height 36 or 40.
 class PortalButton extends StatelessWidget {
   final String label;
   final Object? icon;
@@ -496,89 +374,40 @@ class PortalButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final h = large ? P.hBtn : P.hCtl;
     final enabled = onPressed != null;
-    final fg = primary ? Colors.black : (enabled ? Glass.text : Glass.muted);
-    final shape = const StadiumBorder();
-
-    Widget fill;
-    List<BoxShadow>? outerShadow;
-    if (!enabled) {
-      fill = DecoratedBox(
-        decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(P.rPill),
-            color: Colors.white.withOpacity(0.04)),
-      );
-    } else if (primary) {
-      fill = DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(P.rPill),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(color: Colors.white, blurRadius: 0, offset: const Offset(0, 1)),
-          ],
-        ),
-      );
-      outerShadow = [
-        BoxShadow(color: Colors.black.withOpacity(0.55), blurRadius: 20, offset: const Offset(0, 10)),
-        BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 6, offset: const Offset(0, 2)),
-      ];
-    } else {
-      final tint = destructive ? Glass.bad : Colors.white;
-      fill = DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(P.rPill),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [tint.withOpacity(destructive ? 0.22 : 0.14), tint.withOpacity(destructive ? 0.08 : 0.04)],
-          ),
-          border: Border.all(color: tint.withOpacity(destructive ? 0.4 : 0.16)),
-          boxShadow: [
-            BoxShadow(color: Colors.white.withOpacity(0.22), blurRadius: 0, offset: const Offset(0, 1)),
-          ],
-        ),
-      );
-      outerShadow = [
-        BoxShadow(
-            color: (destructive ? Glass.bad : Colors.black).withOpacity(destructive ? 0.35 : 0.5),
-            blurRadius: 18,
-            offset: const Offset(0, 8)),
-      ];
-    }
-
-    Widget btn = DecoratedBox(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(P.rPill), boxShadow: outerShadow),
-      child: Stack(children: [
-        Positioned.fill(child: fill),
-        Material(
-          color: Colors.transparent,
-          shape: shape,
-          child: InkWell(
-            customBorder: shape,
-            onTap: onPressed,
-            child: SizedBox(
-              height: h,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: large ? P.s24 : P.s16),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  if (icon != null) ...[
-                    PortalGlyph(icon, size: 18, color: fg),
-                    const SizedBox(width: P.s8)
-                  ],
-                  Text(label,
-                      style: P.bodyStrong.copyWith(color: fg, fontSize: large ? 15 : 14)),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ]),
+    final fg = primary
+        ? Glass.base
+        : (!enabled ? Glass.muted : (destructive ? Glass.bad : Glass.text));
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(P.rCtl + 2),
+      side: primary
+          ? BorderSide.none
+          : BorderSide(color: destructive && enabled ? Glass.bad.withOpacity(0.4) : Glass.edge()),
     );
-    return btn;
+    return Material(
+      color: !enabled ? Glass.fill(0.04) : (primary ? Glass.text : Glass.raised),
+      shape: shape,
+      child: InkWell(
+        customBorder: shape,
+        onTap: onPressed,
+        child: SizedBox(
+          height: h,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: large ? P.s24 : P.s16),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              if (icon != null) ...[
+                PortalGlyph(icon, size: 18, color: fg),
+                const SizedBox(width: P.s8)
+              ],
+              Text(label, style: P.bodyStrong.copyWith(color: fg, fontSize: large ? 15 : 14)),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-/// 48 px glass text field.
+/// 44 px text field.
 class PortalInput extends StatelessWidget {
   final TextEditingController? controller;
   final String? hint;
@@ -607,9 +436,9 @@ class PortalInput extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.symmetric(horizontal: P.s16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(P.rPill),
-        border: Border.all(color: Glass.edge(0.16)),
+        color: Glass.raised,
+        borderRadius: BorderRadius.circular(P.rCtl + 2),
+        border: Border.all(color: Glass.edge(0.12)),
       ),
       child: Row(children: [
         if (icon != null) ...[PortalGlyph(icon, size: 20, color: Glass.soft), const SizedBox(width: P.s12)],
@@ -620,7 +449,7 @@ class PortalInput extends StatelessWidget {
             onChanged: onChanged,
             onSubmitted: onSubmitted,
             inputFormatters: formatters,
-            cursorColor: Colors.white,
+            cursorColor: Glass.accent,
             style: style ?? P.body.copyWith(fontSize: 15),
             decoration: InputDecoration(
               isCollapsed: true,
@@ -671,29 +500,27 @@ class PortalTopNav extends StatelessWidget {
       child: GlassCard(
         radius: P.rPill,
         padding: const EdgeInsets.all(P.s4),
-        strength: 1.15,
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           for (var i = 0; i < items.length; i++)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => onChanged(i),
               child: Tooltip(message: items[i].label, child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
+                duration: const Duration(milliseconds: 160),
+                curve: Cubic(0.22, 1, 0.36, 1),
                 height: 36,
                 padding: EdgeInsets.symmetric(horizontal: items.length <= 4 || i == index ? P.s16 : P.s12),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(P.rPill),
-                    color: i == index ? Colors.white.withOpacity(0.2) : Colors.transparent),
+                    color: i == index ? Glass.raised : Colors.transparent),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  PortalGlyph(items[i].icon, size: 18, color: i == index ? Colors.white : Glass.soft),
+                  PortalGlyph(items[i].icon, size: 18, color: i == index ? Glass.text : Glass.soft),
                   if (items.length <= 4 || i == index) const SizedBox(width: P.s8),
                   if (items.length <= 4 || i == index)
                   Text(items[i].label,
                       style: P.bodyStrong.copyWith(
                           fontSize: 13,
-                          color: i == index ? Colors.white : Glass.soft,
-                          fontWeight: i == index ? FontWeight.w700 : FontWeight.w500)),
+                          color: i == index ? Glass.text : Glass.soft)),
                 ]),
               )),
             ),
@@ -703,10 +530,8 @@ class PortalTopNav extends StatelessWidget {
   }
 }
 
-/// Vertical sidebar navigation for the settings window (macOS System
-/// Settings / VS Code style): icon + label rows, stacked, instead of a row
-/// of icon pills. One item per row, 44px tall, full-width highlight on the
-/// selected row.
+/// Vertical sidebar navigation for the settings window: icon + label rows,
+/// one per line, 40 px tall, with a raised surface on the selected row.
 class PortalSideNav extends StatelessWidget {
   final List<PortalNavItem> items;
   final int index;
@@ -725,7 +550,6 @@ class PortalSideNav extends StatelessWidget {
       width: width,
       child: GlassCard(
         radius: P.rCard,
-        liquid: true,
         padding: const EdgeInsets.all(P.s8),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           for (var i = 0; i < items.length; i++)
@@ -737,24 +561,22 @@ class PortalSideNav extends StatelessWidget {
                   borderRadius: BorderRadius.circular(P.rCtl),
                   onTap: () => onChanged(i),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    height: 44,
+                    duration: const Duration(milliseconds: 140),
+                    height: 40,
                     padding: const EdgeInsets.symmetric(horizontal: P.s12),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(P.rCtl),
-                        color: i == index ? Colors.white : Colors.transparent),
+                        color: i == index ? Glass.raised : Colors.transparent),
                     child: Row(children: [
                       PortalGlyph(items[i].icon,
-                          size: 18, color: i == index ? Colors.black : Glass.soft),
+                          size: 18, color: i == index ? Glass.text : Glass.soft),
                       const SizedBox(width: P.s12),
                       Expanded(
                         child: Text(items[i].label,
                             overflow: TextOverflow.ellipsis,
                             style: P.bodyStrong.copyWith(
                                 fontSize: 14,
-                                color: i == index ? Colors.black : Glass.soft,
-                                fontWeight:
-                                    i == index ? FontWeight.w700 : FontWeight.w500)),
+                                color: i == index ? Glass.text : Glass.soft)),
                       ),
                     ]),
                   ),
@@ -789,7 +611,6 @@ class PortalDeviceTile extends StatelessWidget {
     return GlassCard(
       radius: P.rTile,
       onTap: onTap,
-      liquid: true,
       padding: const EdgeInsets.all(P.s16),
       child: SizedBox(
         width: 232,
@@ -798,10 +619,10 @@ class PortalDeviceTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(P.rCtl + 2), color: Colors.white.withOpacity(0.1)),
-            child: const PortalGlyph('monitor', color: Colors.white, size: 24),
+                borderRadius: BorderRadius.circular(P.rCtl), color: Glass.raised),
+            child: const PortalGlyph('monitor', color: Glass.text, size: 22),
           ),
-          const SizedBox(width: P.s16),
+          const SizedBox(width: P.s12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
               Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: P.bodyStrong),
@@ -817,10 +638,10 @@ class PortalDeviceTile extends StatelessWidget {
   }
 }
 
-/// Desktop-only near-black "liquid glass" background: a near-black base with
-/// two faint accent glows (not the phone's strong violet aurora wash — a
-/// mouse-driven, denser desktop UI reads better with the background staying
-/// out of the way). Does not touch the shared mobile `AuroraBackground`.
+/// Desktop page background: one flat graphite layer. It is opaque on purpose:
+/// the native window is transparent (`backgroundColor: Colors.transparent` in
+/// main.dart's WindowOptions), so anything translucent would let the real
+/// desktop show through.
 class DesktopAuroraBackground extends StatelessWidget {
   final Widget child;
   const DesktopAuroraBackground({super.key, required this.child});
@@ -828,15 +649,8 @@ class DesktopAuroraBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      // Opaque base FIRST, as its own layer: a BoxDecoration with both
-      // `color` and `gradient` set silently drops `color` and uses only the
-      // gradient, which fades to fully transparent at the edges — on a
-      // transparent native window (`backgroundColor: Colors.transparent` in
-      // main.dart's WindowOptions) that let the real desktop show through.
       const Positioned.fill(
-        child: IgnorePointer(
-          child: ColoredBox(color: Color(0xFF050507)),
-        ),
+        child: IgnorePointer(child: ColoredBox(color: Glass.base)),
       ),
       Positioned.fill(child: child),
     ]);

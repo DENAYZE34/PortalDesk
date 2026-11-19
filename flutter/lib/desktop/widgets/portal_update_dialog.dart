@@ -101,7 +101,7 @@ class _PortalUpdateDialog extends StatelessWidget {
                             style: TextStyle(
                                 color: _fg,
                                 fontSize: 18,
-                                fontWeight: FontWeight.w800)),
+                                fontWeight: FontWeight.w500)),
                       ),
                     ],
                   ),
@@ -114,7 +114,7 @@ class _PortalUpdateDialog extends StatelessWidget {
                         style: TextStyle(
                             color: _fg,
                             fontSize: 13,
-                            fontWeight: FontWeight.w700)),
+                            fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
                     for (final n in notes)
                       Padding(
@@ -174,7 +174,7 @@ class _PortalUpdateDialog extends StatelessWidget {
                           },
                           child: const Text('Обновить',
                               style: TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 14)),
+                                  fontWeight: FontWeight.w500, fontSize: 14)),
                         ),
                       ),
                     ],

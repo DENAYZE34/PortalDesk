@@ -19,6 +19,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../common.dart';
 import '../../common/widgets/chat_page.dart';
 import '../../mobile/neon_theme.dart';
+import '../../mobile/glass/glass.dart';
 import '../glass/portal_ui.dart';
 import '../../models/file_model.dart';
 import '../../models/platform_model.dart';
@@ -472,14 +473,7 @@ class _CmHeaderState extends State<_CmHeader>
             )
           : BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color(0xff00bfe1),
-            Color(0xff0071ff),
-          ],
-        ),
+        color: Glass.surface,
       ),
       margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
       padding: EdgeInsets.only(
@@ -502,7 +496,7 @@ class _CmHeaderState extends State<_CmHeader>
                   client.name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     fontSize: 20,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -613,18 +607,9 @@ class _CmHeaderState extends State<_CmHeader>
       alignment: Alignment.center,
       decoration: kNeon
           ? BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF3A3A3E), Color(0xFF0A0A0B)],
-              ),
+              color: Glass.raised,
               borderRadius: BorderRadius.circular(15.0),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8)),
-              ],
+              
             )
           : BoxDecoration(
         color: str2color(client.name),
@@ -633,7 +618,7 @@ class _CmHeaderState extends State<_CmHeader>
       child: Text(
         client.name.isNotEmpty ? client.name[0] : '?',
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
           color: Colors.white,
           fontSize: 55,
         ),
@@ -663,24 +648,8 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
         decoration: kNeon
             ? BoxDecoration(
                 borderRadius: BorderRadius.circular(P.rCtl),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: enabled
-                      ? [Colors.white, const Color(0xFFDFDFE3)]
-                      : [
-                          Colors.white.withOpacity(canModify ? 0.1 : 0.05),
-                          Colors.white.withOpacity(canModify ? 0.02 : 0.01),
-                        ],
-                ),
-                boxShadow: enabled
-                    ? [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6)),
-                      ]
-                    : null,
+                color: enabled ? Glass.text : Glass.raised,
+                
               )
             : BoxDecoration(
           color: enabled
@@ -755,7 +724,7 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
             translate("Permissions"),
             style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: kNeon ? Colors.white : null),
             textAlign: TextAlign.center,
           ).marginOnly(left: 4.0, bottom: 8.0),

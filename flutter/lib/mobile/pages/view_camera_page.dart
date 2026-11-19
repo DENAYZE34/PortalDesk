@@ -612,7 +612,7 @@ void showOptions(
                       style: TextStyle(
                           color:
                               i == cur ? numColorSelected : numColorUnselected,
-                          fontWeight: FontWeight.bold))))));
+                          fontWeight: FontWeight.w500))))));
     }
     displays.add(Padding(
         padding: const EdgeInsets.only(top: 8),

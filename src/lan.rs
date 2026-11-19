@@ -4,7 +4,7 @@ use hbb_common::{
     allow_err,
     anyhow::bail,
     config::Config,
-    config::{self, RENDEZVOUS_PORT},
+    config::{self},
     log,
     protobuf::Message as _,
     rendezvous_proto::*,
@@ -106,7 +106,7 @@ pub fn send_wol(id: String) {
 
 #[inline]
 fn get_broadcast_port() -> u16 {
-    (RENDEZVOUS_PORT + 3) as _
+    21219
 }
 
 fn get_mac(_ip: &IpAddr) -> String {

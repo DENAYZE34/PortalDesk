@@ -35,7 +35,7 @@
 			<string>com.portalremote.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>portal</string>
+				<string>portaldesk</string>
 			</array>
 		</dict>
 	</array>

@@ -2708,7 +2708,7 @@ class _AboutState extends State<_About> {
                           Text(
                             translate('Slogan_tip'),
                             style: TextStyle(
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.white),
                           )
                         ],

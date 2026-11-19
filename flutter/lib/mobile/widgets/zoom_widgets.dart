@@ -88,7 +88,7 @@ class ZoomButton extends StatelessWidget {
                         style: const TextStyle(
                             color: Colors.amberAccent,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold)),
+                            fontWeight: FontWeight.w500)),
                   ),
                 ),
             ],

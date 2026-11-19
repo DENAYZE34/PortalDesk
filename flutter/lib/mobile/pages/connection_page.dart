@@ -149,7 +149,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(translate('Download new version'),
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold))));
+                        color: Colors.white, fontWeight: FontWeight.w500))));
   }
 
   /// UI for the remote ID TextField.
@@ -245,7 +245,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                         },
                         style: TextStyle(
                           fontFamily: 'WorkSans',
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           fontSize: 30,
                           color: kNeon ? Neon.text : MyTheme.idColor,
                         ),
@@ -254,7 +254,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                           // hintText: 'Enter your remote ID',
                           border: InputBorder.none,
                           helperStyle: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                             fontSize: 16,
                             color: MyTheme.darkGray,
                           ),
@@ -450,7 +450,7 @@ class _LastDeviceHeroState extends State<_LastDeviceHero> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                color: Glass.text, fontSize: 26, fontWeight: FontWeight.w800)),
+                color: Glass.text, fontSize: 26, fontWeight: FontWeight.w500)),
         const SizedBox(height: 2),
         Text(sub, style: const TextStyle(color: Glass.soft, fontSize: 13)),
         if (p != null) ...[

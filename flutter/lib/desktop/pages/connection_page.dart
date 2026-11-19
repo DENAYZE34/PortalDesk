@@ -495,7 +495,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                             fontSize: 20,
                             height: 1.4,
                             color: kNeon ? Glass.text : null,
-                            fontWeight: kNeon ? FontWeight.w700 : null,
+                            fontWeight: kNeon ? FontWeight.w500 : null,
                           ),
                           maxLines: 1,
                           cursorColor:
@@ -617,29 +617,13 @@ class _ConnectionPageState extends State<ConnectionPage>
                   height: kNeon ? 38.0 : 28.0,
                   width: kNeon ? 38.0 : 28.0,
                   decoration: BoxDecoration(
-                    gradient: kNeon
-                        ? LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Glass.fill(0.16), Glass.fill(0.04)])
-                        : null,
+                    color: kNeon ? Glass.raised : null,
                     border: Border.all(
                         color: kNeon
                             ? Glass.edge()
                             : Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(kNeon ? 99 : 8),
-                    boxShadow: kNeon
-                        ? [
-                            BoxShadow(
-                                color: Colors.white.withOpacity(0.2),
-                                blurRadius: 0,
-                                offset: const Offset(0, 1)),
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.4),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4)),
-                          ]
-                        : null,
+                    
                   ),
                   child: Center(
                     child: StatefulBuilder(

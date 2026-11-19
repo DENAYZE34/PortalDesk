@@ -86,7 +86,7 @@ class _PermissionWizardPageState extends State<PermissionWizardPage>
               style: TextStyle(
                   color: Glass.text,
                   fontSize: 20,
-                  fontWeight: FontWeight.w700)),
+                  fontWeight: FontWeight.w500)),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
@@ -107,7 +107,7 @@ class _PermissionWizardPageState extends State<PermissionWizardPage>
                       style: const TextStyle(
                           color: Glass.text,
                           fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           height: 1.25)),
                 ),
               ]),

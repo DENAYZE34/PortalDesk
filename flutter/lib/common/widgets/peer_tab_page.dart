@@ -24,6 +24,7 @@ import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../common.dart';
 import '../../mobile/neon_theme.dart';
+import '../../mobile/glass/glass.dart';
 import '../../models/platform_model.dart';
 
 class PeerTabPage extends StatefulWidget {
@@ -155,24 +156,8 @@ class _PeerTabPageState extends State<PeerTabPage>
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: selected
-                      ? [Colors.white, const Color(0xFFDFDFE3)]
-                      : [
-                          Colors.white.withOpacity(0.1),
-                          Colors.white.withOpacity(0.02),
-                        ],
-                ),
-                boxShadow: selected
-                    ? [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6)),
-                      ]
-                    : null,
+                color: selected ? Glass.text : Glass.raised,
+                
               ),
               alignment: Alignment.center,
               child: Icon(model.tabIcon(t),
@@ -233,24 +218,8 @@ class _PeerTabPageState extends State<PeerTabPage>
                               margin: const EdgeInsets.symmetric(horizontal: 3),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: selected
-                                      ? [Colors.white, const Color(0xFFDFDFE3)]
-                                      : [
-                                          Colors.white.withOpacity(0.1),
-                                          Colors.white.withOpacity(0.02),
-                                        ],
-                                ),
-                                boxShadow: selected
-                                    ? [
-                                        BoxShadow(
-                                            color: Colors.black.withOpacity(0.5),
-                                            blurRadius: 12,
-                                            offset: const Offset(0, 6)),
-                                      ]
-                                    : null,
+                                color: selected ? Glass.text : Glass.raised,
+                                
                               ),
                               alignment: Alignment.center,
                               child: Icon(model.tabIcon(t),

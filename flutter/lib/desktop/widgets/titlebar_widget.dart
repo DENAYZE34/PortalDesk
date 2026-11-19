@@ -13,11 +13,7 @@ class DesktopTitleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [backgroundStartColor, backgroundEndColor],
-            stops: [0.0, 1.0]),
+        color: Color(0xFF141415),
       ),
       child: Row(
         children: [

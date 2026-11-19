@@ -19,4 +19,6 @@ grep -n 'admin.rustdesk.com".to_owned' src/common.rs && { echo "RustDesk API fal
 grep -n 'api.rustdesk.com/version' libs/hbb_common/src/lib.rs && { echo "RustDesk version-check URL present"; fail=1; }
 grep -rnE "[\"']https://(www[.])?rustdesk[.]com/docs|[\"']https://github[.]com/rustdesk/rustdesk/issues" flutter/lib src/client.rs libs/hbb_common/src/config.rs && { echo "RustDesk links in app"; fail=1; }
 grep -q 'const UPDATE_OWNER: &str = "DENAYZE34";' src/updater.rs && grep -qF 'const UPDATE_REPOS: [&str; 2] = ["PortalDesk", "portal-remote"];' src/updater.rs || { echo "updater trusts a repository other than ours"; fail=1; }
+grep -q 'android:scheme="portaldesk"' flutter/android/app/src/main/AndroidManifest.xml && ! grep -q 'android:scheme="rustdesk"' flutter/android/app/src/main/AndroidManifest.xml || { echo "Android deep-link scheme must be portaldesk, not rustdesk"; fail=1; }
+grep -rqE "RuntimeBroker_rustdesk|RustDeskPrivacyWindow|dyn[.]com[.]rustdesk" src libs/portable/src && { echo "Global name shared with RustDesk (broker exe, privacy window or clipboard format)"; fail=1; }
 exit $fail

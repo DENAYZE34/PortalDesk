@@ -106,7 +106,7 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                   const Text('Подтвердите, что это вы',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          color: fg, fontSize: 22, fontWeight: FontWeight.w800)),
+                          color: fg, fontSize: 22, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 6),
                   const Text(
                       'Чтобы защитить PortalDesk от мошенников, один раз '
@@ -149,7 +149,7 @@ class _TelegramGateScreenState extends State<TelegramGateScreen> {
                           child: Text(
                               _opening ? 'Открываем…' : 'Войти через Telegram',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 15)),
+                                  fontWeight: FontWeight.w500, fontSize: 15)),
                         ),
                       ),
                       const SizedBox(height: 10),

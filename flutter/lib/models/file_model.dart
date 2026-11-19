@@ -236,7 +236,7 @@ class FileModel {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(translate("This file exists, skip or overwrite this file?"),
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 5),
               Text(content),
               Offstage(
@@ -832,7 +832,7 @@ class FileController {
             Text(
               translate("This is irreversible!"),
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: Colors.red,
               ),
             ).paddingOnly(top: 20),

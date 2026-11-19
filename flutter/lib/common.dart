@@ -498,7 +498,7 @@ class MyTheme {
           ? const TextStyle(
               color: Colors.white,
               fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               letterSpacing: 0.4)
           : null,
     ),
@@ -547,7 +547,7 @@ class MyTheme {
       bodyMedium: TextStyle(fontSize: 14, height: 1.25),
       labelLarge: TextStyle(
         fontSize: 16.0,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w500,
         color: accent80,
       ),
     ),
@@ -3917,7 +3917,7 @@ Widget _buildPresetPasswordWarning() {
             color: Colors.red,
             fontSize:
                 18, // https://github.com/rustdesk/rustdesk-server-pro/issues/261
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
           ),
         )).paddingOnly(bottom: 8),
         Text(

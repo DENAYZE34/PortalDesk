@@ -318,14 +318,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
         child: SingleChildScrollView(
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [
-                  Color(0xffe242bc),
-                  Color(0xfff4727c),
-                ],
-              ),
+              color: Glass.surface,
             ),
             padding: EdgeInsets.all(25.0),
             child: Column(
@@ -343,7 +336,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                       translate("Warning"),
                       style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         fontSize: 20.0,
                       ),
                     ),
@@ -362,7 +355,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     fontSize: 22.0,
                   ),
                 ),
@@ -371,7 +364,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                   "${translate("scam_text1")}\n\n${translate("scam_text2")}\n",
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     fontSize: 16.0,
                   ),
                 ),
@@ -389,7 +382,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                       translate("Don't show again"),
                       style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         fontSize: 15.0,
                       ),
                     ),
@@ -419,7 +412,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                               ? "${translate("I Agree")} (${_countdown}s)"
                               : translate("I Agree"),
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                             fontSize: 13.0,
                           ),
                           maxLines: 2,
@@ -440,7 +433,7 @@ class ScamWarningDialogState extends State<ScamWarningDialog> {
                         child: Text(
                           translate("Decline"),
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                             fontSize: 13.0,
                           ),
                           maxLines: 2,
@@ -475,9 +468,9 @@ class ServerInfo extends StatelessWidget {
     const double iconMarginRight = 15;
     const double iconSize = 24;
     const TextStyle textStyleHeading = TextStyle(
-        fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.grey);
+        fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.grey);
     const TextStyle textStyleValue =
-        TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold);
+        TextStyle(fontSize: 25.0, fontWeight: FontWeight.w500);
 
     void copyToClipboard(String value) {
       Clipboard.setData(ClipboardData(text: value));
@@ -831,7 +824,7 @@ class PaddingCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge
-                            ?.merge(TextStyle(fontWeight: FontWeight.bold))),
+                            ?.merge(TextStyle(fontWeight: FontWeight.w500))),
                   )
                 ],
               )));

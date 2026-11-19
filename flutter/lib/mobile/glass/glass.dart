@@ -1,24 +1,39 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-/// PortalDesk "glass" design system: black and white only, no accent hues
-/// (owner decision, see docs/design-glass.md). Pure Flutter, no app
-/// dependencies, so it can be previewed on its own.
+/// PortalDesk design system: flat graphite surfaces, hairline borders, one
+/// off-white primary action. Depth comes from surface steps, never from glow,
+/// blur or gradient. Pure Flutter, no app dependencies, so it can be previewed
+/// on its own. Class names are kept from the earlier "glass" system so call
+/// sites do not change.
 class Glass {
-  static const Color base = Color(0xFF050507);
-  static const Color text = Color(0xFFF2F2F2);
-  static const Color soft = Color(0xFFC9C9C9);
-  static const Color muted = Color(0xFF8C8C8C);
-  static const Color ok = Color(0xFF34D399);
-  static const Color warn = Color(0xFFFBBF24);
-  static const Color bad = Color(0xFFF87171);
+  // Surfaces, darkest to lightest.
+  static const Color base = Color(0xFF141415);
+  static const Color surface = Color(0xFF19191B);
+  static const Color raised = Color(0xFF232325);
 
-  static Color fill([double a = 0.08]) => Colors.white.withOpacity(a);
-  static Color edge([double a = 0.16]) => Colors.white.withOpacity(a);
+  // Text roles.
+  static const Color text = Color(0xFFEDEDED);
+  static const Color soft = Color(0xFFA1A1A6);
+  static const Color muted = Color(0xFF85858B);
 
-  static const double rCard = 28;
+  // One accent, for focus and the single thing that matters on a screen.
+  static const Color accent = Color(0xFF5B9DFF);
+
+  // Semantic colors, toned to sit on the graphite ramp.
+  static const Color ok = Color(0xFF4CC38A);
+  static const Color warn = Color(0xFFE0A43B);
+  static const Color bad = Color(0xFFE5484D);
+
+  /// Surface step: the text color at low opacity over the page.
+  static Color fill([double a = 0.05]) => text.withOpacity(a);
+
+  /// Hairline: the text color at 8%.
+  static Color edge([double a = 0.08]) => text.withOpacity(a);
+
+  // Radii: row/input/button 10, card 16, pill for the floating bars only.
+  static const double rCtl = 10;
+  static const double rCard = 16;
   static const double rPill = 99;
 }
 
@@ -37,31 +52,27 @@ class AuroraBackground extends StatelessWidget {
   }
 }
 
-/// A frosted panel.
+/// A raised surface with a hairline border.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry? margin;
   final double radius;
-  final double blur;
   final double strength;
   final VoidCallback? onTap;
-  /// Opt-in "liquid glass" depth: inset highlight, drop shadow, top-left
-  /// specular glare. Off by default so existing (phone) call sites are
-  /// unchanged; desktop passes true.
-  final bool liquid;
-  /// Opt-in entrance animation (fade + slide-up). Off by default so existing
-  /// call sites, including the ones GlassNavBar/GlassDock rebuild per frame,
-  /// are unaffected.
   final bool animate;
   final Duration animateDelay;
+
+  /// Kept so older call sites compile. Flat surfaces ignore it.
+  final double blur;
+  final bool liquid;
   const GlassCard(
       {super.key,
       required this.child,
       this.padding = const EdgeInsets.all(16),
       this.margin,
       this.radius = Glass.rCard,
-      this.blur = 22,
+      this.blur = 0,
       this.strength = 1,
       this.onTap,
       this.liquid = false,
@@ -71,104 +82,43 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final r = BorderRadius.circular(radius);
-    Widget inner = Container(
+    Widget body = Container(
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: r,
-        color: liquid ? Colors.black.withOpacity(0.35 * strength) : null,
-        gradient: liquid
-            ? null
-            : LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Glass.fill(0.14 * strength), Glass.fill(0.05 * strength)],
-              ),
-        border: Border.all(
-            color: Glass.edge((liquid ? 0.09 : 0.18) * strength), width: 1),
-        boxShadow: liquid
-            ? [
-                BoxShadow(
-                    color: Colors.white.withOpacity(0.22 * strength),
-                    blurRadius: 0,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 1)),
-              ]
-            : null,
+        color: Glass.surface,
+        border: Border.all(color: Glass.edge(0.08 * strength.clamp(1, 1.5))),
       ),
       child: child,
     );
-    if (liquid) {
-      inner = Stack(children: [
-        inner,
-        Positioned.fill(
-          child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: r,
-                gradient: RadialGradient(
-                  center: const Alignment(-0.7, -1.2),
-                  radius: 1.1,
-                  colors: [
-                    Colors.white.withOpacity(0.14 * strength),
-                    Colors.white.withOpacity(0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ]);
-    }
-    Widget body = ClipRRect(
-      borderRadius: r,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: inner,
-      ),
-    );
-    if (liquid) {
-      body = Container(
-        decoration: BoxDecoration(borderRadius: r, boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.65),
-              blurRadius: 50,
-              spreadRadius: -8,
-              offset: const Offset(0, 24)),
-          BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 3)),
-        ]),
-        child: body,
-      );
-    }
     if (onTap != null) {
       body = Material(
         type: MaterialType.transparency,
-        child: InkWell(
-            borderRadius: r, onTap: onTap, child: body),
+        child: InkWell(borderRadius: r, onTap: onTap, child: body),
       );
     }
-    Widget result = margin == null ? body : Padding(padding: margin!, child: body);
+    Widget result =
+        margin == null ? body : Padding(padding: margin!, child: body);
     if (animate) {
       result = result
           .animate(delay: animateDelay)
-          .fadeIn(duration: 300.ms)
-          .slideY(begin: 0.08, end: 0, duration: 300.ms, curve: Curves.easeOut);
+          .fadeIn(duration: 300.ms, curve: _ease)
+          .slideY(begin: 0.04, end: 0, duration: 300.ms, curve: _ease);
     }
     return result;
   }
 }
 
-/// The one loud button: white, soft violet glow.
+const Curve _ease = Cubic(0.22, 1, 0.36, 1);
+
+/// The one loud button: off-white with dark text. The quiet variant is a
+/// raised surface with a hairline.
 class GlassButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
   final bool filled;
   final bool dense;
-  /// Opt-in scale-down press feedback. Off by default so existing call
-  /// sites are unaffected.
   final bool animate;
   const GlassButton(
       {super.key,
@@ -186,79 +136,44 @@ class GlassButton extends StatelessWidget {
   }
 
   Widget _buildButton(BuildContext context) {
-    final fg = filled ? Colors.black : Glass.text;
-    final shape = const StadiumBorder();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Glass.rPill),
-        boxShadow: filled
-            ? [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10)),
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.35),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2)),
-              ]
-            : null,
-      ),
-      child: Stack(children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Glass.rPill),
-              color: filled ? Colors.white : null,
-              gradient: filled
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Glass.fill(0.16), Glass.fill(0.04)],
-                    ),
-              border: filled ? null : Border.all(color: Glass.edge()),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.white.withOpacity(filled ? 1 : 0.2),
-                    blurRadius: 0,
-                    offset: const Offset(0, 1)),
+    final enabled = onPressed != null;
+    final fg = filled ? Glass.base : Glass.text;
+    final shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Glass.rCtl + 2));
+    return Opacity(
+      opacity: enabled ? 1 : 0.5,
+      child: Material(
+        color: filled ? Glass.text : Glass.raised,
+        shape: shape.copyWith(
+            side: filled ? BorderSide.none : BorderSide(color: Glass.edge())),
+        child: InkWell(
+          customBorder: shape,
+          onTap: onPressed,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: dense ? 8 : 14, horizontal: dense ? 12 : 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: dense ? 16 : 18, color: fg),
+                  SizedBox(width: dense ? 6 : 8)
+                ],
+                Flexible(
+                  child: Text(label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: fg,
+                          fontWeight: FontWeight.w500,
+                          fontSize: dense ? 13 : 15)),
+                ),
               ],
             ),
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          shape: shape,
-          child: InkWell(
-            customBorder: shape,
-            onTap: onPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: dense ? 9 : 15, horizontal: dense ? 14 : 22),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: dense ? 15 : 20, color: fg),
-                    SizedBox(width: dense ? 5 : 8)
-                  ],
-                  Flexible(
-                    child: Text(label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: fg,
-                            fontWeight: FontWeight.w700,
-                            fontSize: dense ? 13 : 16)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ]),
+      ),
     );
   }
 }
@@ -286,31 +201,26 @@ class _PressScaleState extends State<_PressScale> {
       onPointerUp: (_) => _setPressed(false),
       onPointerCancel: (_) => _setPressed(false),
       child: AnimatedScale(
-        scale: _pressed ? 0.94 : 1,
+        scale: _pressed ? 0.97 : 1,
         duration: 120.ms,
-        curve: Curves.easeOut,
+        curve: _ease,
         child: widget.child,
       ),
     );
   }
 }
 
-/// Glowing status dot.
+/// Status dot. Flat: the color alone says the state.
 class StatusDot extends StatelessWidget {
   final Color color;
   final bool glow;
-  const StatusDot({super.key, this.color = Glass.ok, this.glow = true});
+  const StatusDot({super.key, this.color = Glass.ok, this.glow = false});
 
   @override
   Widget build(BuildContext context) => Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          boxShadow:
-              glow ? [BoxShadow(color: color.withOpacity(0.8), blurRadius: 10)] : null,
-        ),
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       );
 }
 
@@ -348,8 +258,7 @@ class GlassNavBar extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: GlassCard(
                 radius: Glass.rPill,
-                padding: const EdgeInsets.all(6),
-                strength: 1.15,
+                padding: const EdgeInsets.all(4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -385,38 +294,37 @@ class _NavChip extends StatelessWidget {
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        // icon 22 + 13*2 padding = 48dp tall, 14*2 + 22 = 50dp wide:
-        // the Material minimum without letting the chip expand.
-        padding: EdgeInsets.symmetric(
-            horizontal: selected ? 18 : 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: selected ? Colors.white.withOpacity(0.2) : Colors.transparent,
-          borderRadius: BorderRadius.circular(Glass.rPill),
-        ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(item.icon,
-              size: 22, color: selected ? Colors.white : Glass.soft),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            child: selected
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Text(item.label,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14)),
-                  )
-                : const SizedBox.shrink(),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: _ease,
+          // icon 22 + 13*2 padding = 48dp tall, the Material minimum.
+          padding: EdgeInsets.symmetric(
+              horizontal: selected ? 18 : 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: selected ? Glass.raised : Colors.transparent,
+            borderRadius: BorderRadius.circular(Glass.rPill),
           ),
-        ]),
-      ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(item.icon,
+                size: 22, color: selected ? Glass.text : Glass.soft),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 180),
+              curve: _ease,
+              child: selected
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(item.label,
+                          style: const TextStyle(
+                              color: Glass.text,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14)),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ]),
+        ),
       ),
     );
   }
@@ -436,7 +344,7 @@ class GlassSegmented extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      radius: Glass.rPill,
+      radius: Glass.rCtl + 2,
       padding: const EdgeInsets.all(4),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         for (var i = 0; i < labels.length; i++)
@@ -444,19 +352,18 @@ class GlassSegmented extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: () => onChanged(i),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 160),
+              curve: _ease,
               padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: i == index
-                    ? Colors.white.withOpacity(0.22)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(Glass.rPill),
+                color: i == index ? Glass.raised : Colors.transparent,
+                borderRadius: BorderRadius.circular(Glass.rCtl),
               ),
               child: Text(labels[i],
                   style: TextStyle(
-                      color: i == index ? Colors.white : Glass.soft,
-                      fontWeight: FontWeight.w700,
+                      color: i == index ? Glass.text : Glass.soft,
+                      fontWeight: FontWeight.w500,
                       fontSize: 13)),
             ),
           ),
@@ -491,7 +398,6 @@ class GlassDock extends StatelessWidget {
     return GlassCard(
       radius: Glass.rPill,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      strength: 1.2,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         for (final it in items)
           Padding(
@@ -505,20 +411,11 @@ class GlassDock extends StatelessWidget {
                   height: 42,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: it.primary
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.12),
-                    boxShadow: it.primary
-                        ? [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 16)
-                          ]
-                        : null,
+                    color: it.primary ? Glass.text : Glass.raised,
                   ),
                   child: Icon(it.icon,
-                      size: 21,
-                      color: it.primary ? Colors.black : Colors.white),
+                      size: 20,
+                      color: it.primary ? Glass.base : Glass.text),
                 ),
               ),
             ),

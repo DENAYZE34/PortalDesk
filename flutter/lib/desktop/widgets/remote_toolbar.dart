@@ -1081,7 +1081,7 @@ class _MainMonitorSwitchButton extends StatelessWidget {
                   color: Colors.black,
                   fontSize: 11,
                   height: 1,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -1178,7 +1178,7 @@ class _MonitorMenu extends StatelessWidget {
               ? _ToolbarTheme.blueColor
               : _ToolbarTheme.inactiveColor,
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         ),
       );
 
@@ -1289,7 +1289,7 @@ class _MonitorMenu extends StatelessWidget {
                     ? activeTextColor
                     : _ToolbarTheme.inactiveColor,
                 fontSize: fontSize,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             )),
           ),
@@ -3818,7 +3818,7 @@ class _MinimizedMonitorSwitchButton extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 9,
                   height: 1,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
